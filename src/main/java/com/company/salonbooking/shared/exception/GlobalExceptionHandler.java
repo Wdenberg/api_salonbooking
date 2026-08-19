@@ -70,4 +70,9 @@ public class GlobalExceptionHandler {
         );
         return ResponseEntity.status(status).body(body);
     }
+    @ExceptionHandler(com.company.salonbooking.business.domain.exception.InvalidOpeningHoursException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidOpeningHours(
+            com.company.salonbooking.business.domain.exception.InvalidOpeningHoursException ex, HttpServletRequest request) {
+        return build(HttpStatus.UNPROCESSABLE_ENTITY, "INVALID_OPENING_HOURS", ex.getMessage(), request, List.of());
+    }
 }

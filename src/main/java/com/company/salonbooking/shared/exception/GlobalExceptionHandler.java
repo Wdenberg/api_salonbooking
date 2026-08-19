@@ -5,7 +5,10 @@ import com.company.salonbooking.identity.domain.exception.InvalidCredentialsExce
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -74,5 +77,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleInvalidOpeningHours(
             com.company.salonbooking.business.domain.exception.InvalidOpeningHoursException ex, HttpServletRequest request) {
         return build(HttpStatus.UNPROCESSABLE_ENTITY, "INVALID_OPENING_HOURS", ex.getMessage(), request, List.of());
+    }
+    @ExceptionHandler({AccessDeniedException.class, AuthorizationDeniedException.class})
+    public ResponseEntity<ProblemDetail> handleAccessDenied(Exception ex, HttpServletRequest request) {
+        // Retorna HTTP 403 FORBIDDEN para falhas de autorização de rotas/anotações
+        ProblemDetail problem = ProblemDetail.forStatusAndDetail(HttpStatus.FORBIDDEN, "Access denied");
+        problem.setProperty("code", "FORBIDDEN");
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
     }
 }

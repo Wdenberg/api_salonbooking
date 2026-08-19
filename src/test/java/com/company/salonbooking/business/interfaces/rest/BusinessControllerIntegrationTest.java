@@ -4,16 +4,16 @@ import com.company.salonbooking.AbstractIntegrationTest;
 import com.company.salonbooking.business.interfaces.rest.dto.CreateBusinessRequest;
 import com.company.salonbooking.business.interfaces.rest.dto.UpdateBusinessRequest;
 import com.company.salonbooking.identity.interfaces.rest.dto.RegisterOwnerRequest;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-
+import tools.jackson.databind.ObjectMapper;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 class BusinessControllerIntegrationTest extends AbstractIntegrationTest {
 
@@ -51,12 +51,15 @@ class BusinessControllerIntegrationTest extends AbstractIntegrationTest {
 
         String businessId = objectMapper.readTree(createResult.getResponse().getContentAsString()).get("id").asText();
 
-        mockMvc.perform(get("/api/v1/businesses/" + businessId))
+        // Adicionado .header("Authorization", "Bearer " + token)
+        mockMvc.perform(get("/api/v1/businesses/" + businessId)
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Barbearia Central"));
 
-        // Default settings should exist automatically
-        mockMvc.perform(get("/api/v1/businesses/" + businessId + "/settings"))
+        // Adicionado .header("Authorization", "Bearer " + token)
+        mockMvc.perform(get("/api/v1/businesses/" + businessId + "/settings")
+                        .header("Authorization", "Bearer " + token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.slotIntervalMinutes").value(30));
     }

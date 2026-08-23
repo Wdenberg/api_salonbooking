@@ -4,7 +4,7 @@ import com.company.salonbooking.AbstractIntegrationTest;
 import com.company.salonbooking.business.interfaces.rest.dto.CreateBusinessRequest;
 import com.company.salonbooking.employee.interfaces.rest.dto.CreateEmployeeRequest;
 import com.company.salonbooking.identity.interfaces.rest.dto.RegisterOwnerRequest;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -56,7 +56,7 @@ class EmployeeControllerIntegrationTest extends AbstractIntegrationTest {
 
         String employeeId = objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asText();
 
-        mockMvc.perform(get("/api/v1/employees/" + employeeId))
+        mockMvc.perform(get("/api/v1/employees/" + employeeId).header("Authorization", "Bearer " + ownerToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.specialty").value("Corte masculino"));
     }

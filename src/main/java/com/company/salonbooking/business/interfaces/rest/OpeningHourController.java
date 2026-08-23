@@ -4,7 +4,7 @@ import com.company.salonbooking.business.application.command.UpdateOpeningHoursC
 import com.company.salonbooking.business.application.usecase.GetOpeningHoursUseCase;
 import com.company.salonbooking.business.application.usecase.UpdateOpeningHoursUseCase;
 import com.company.salonbooking.business.domain.model.OpeningHourInterval;
-import com.company.salonbooking.business.domain.model.TimeRange;
+import com.company.salonbooking.shared.domain.model.TimeRange;
 import com.company.salonbooking.business.interfaces.rest.dto.OpeningHourIntervalDto;
 import com.company.salonbooking.infrastructure.security.AuthenticatedUser;
 import io.swagger.v3.oas.annotations.tags.Tag;

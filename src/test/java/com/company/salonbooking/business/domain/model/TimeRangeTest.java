@@ -1,5 +1,6 @@
 package com.company.salonbooking.business.domain.model;
 
+import com.company.salonbooking.shared.domain.model.TimeRange;
 import org.junit.jupiter.api.Test;
 
 import java.time.LocalTime;

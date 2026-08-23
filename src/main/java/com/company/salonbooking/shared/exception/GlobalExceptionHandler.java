@@ -85,4 +85,10 @@ public class GlobalExceptionHandler {
         problem.setProperty("code", "FORBIDDEN");
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(problem);
     }
+
+    @ExceptionHandler(com.company.salonbooking.employee.domain.exception.InvalidAvailabilityBlockException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidAvailabilityBlock(
+            com.company.salonbooking.employee.domain.exception.InvalidAvailabilityBlockException ex, HttpServletRequest request) {
+        return build(HttpStatus.UNPROCESSABLE_ENTITY, "INVALID_AVAILABILITY_BLOCK", ex.getMessage(), request, List.of());
+    }
 }

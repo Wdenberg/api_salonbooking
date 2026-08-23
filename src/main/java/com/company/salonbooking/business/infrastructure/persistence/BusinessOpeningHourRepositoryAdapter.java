@@ -1,7 +1,7 @@
 package com.company.salonbooking.business.infrastructure.persistence;
 
 import com.company.salonbooking.business.domain.model.OpeningHourInterval;
-import com.company.salonbooking.business.domain.model.TimeRange;
+import com.company.salonbooking.shared.domain.model.TimeRange;
 import com.company.salonbooking.business.domain.repository.BusinessOpeningHourRepository;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;

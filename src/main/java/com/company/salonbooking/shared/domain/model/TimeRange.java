@@ -1,4 +1,4 @@
-package com.company.salonbooking.business.domain.model;
+package com.company.salonbooking.shared.domain.model;
 
 import java.time.LocalTime;
 import java.util.Objects;

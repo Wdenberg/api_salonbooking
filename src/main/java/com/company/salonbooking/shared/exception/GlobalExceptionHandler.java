@@ -122,4 +122,16 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.CONFLICT, "DATA_INTEGRITY_VIOLATION",
                 "The request conflicts with existing data.", request, List.of());
     }
+
+    @ExceptionHandler(com.company.salonbooking.infrastructure.idempotency.IdempotencyKeyInProgressException.class)
+    public ResponseEntity<ErrorResponse> handleIdempotencyInProgress(
+            com.company.salonbooking.infrastructure.idempotency.IdempotencyKeyInProgressException ex, HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT, "IDEMPOTENCY_KEY_IN_PROGRESS", ex.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(com.company.salonbooking.infrastructure.idempotency.IdempotencyKeyMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleIdempotencyMismatch(
+            com.company.salonbooking.infrastructure.idempotency.IdempotencyKeyMismatchException ex, HttpServletRequest request) {
+        return build(HttpStatus.UNPROCESSABLE_ENTITY, "IDEMPOTENCY_KEY_MISMATCH", ex.getMessage(), request, List.of());
+    }
 }

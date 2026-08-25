@@ -61,11 +61,13 @@ class ServiceControllerIntegrationTest extends AbstractIntegrationTest {
 
         String serviceId = objectMapper.readTree(createResult.getResponse().getContentAsString()).get("id").asText();
 
-        mockMvc.perform(get("/api/v1/services/" + serviceId))
+        mockMvc.perform(get("/api/v1/services/" + serviceId)
+                        .header("Authorization", "Bearer " + ownerToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.durationMinutes").value(30));
 
-        mockMvc.perform(get("/api/v1/businesses/" + businessId + "/services"))
+        mockMvc.perform(get("/api/v1/businesses/" + businessId + "/services")
+                        .header("Authorization", "Bearer " + ownerToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].name").value("Corte Masculino"));
     }

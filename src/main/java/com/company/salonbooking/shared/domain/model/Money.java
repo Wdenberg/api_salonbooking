@@ -1,4 +1,4 @@
-package com.company.salonbooking.catalog.domain.model;
+package com.company.salonbooking.shared.domain.model;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

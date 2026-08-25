@@ -1,6 +1,6 @@
 package com.company.salonbooking.catalog.infrastructure.persistence;
 
-import com.company.salonbooking.catalog.domain.model.Money;
+import com.company.salonbooking.shared.domain.model.Money;
 import com.company.salonbooking.catalog.domain.model.ServiceDuration;
 import com.company.salonbooking.catalog.domain.model.ServiceOffering;
 import com.company.salonbooking.catalog.domain.repository.ServiceOfferingRepository;

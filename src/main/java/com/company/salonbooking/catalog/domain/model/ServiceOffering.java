@@ -1,5 +1,7 @@
 package com.company.salonbooking.catalog.domain.model;
 
+import com.company.salonbooking.shared.domain.model.Money;
+
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;

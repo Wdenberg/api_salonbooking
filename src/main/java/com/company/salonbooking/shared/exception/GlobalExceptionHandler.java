@@ -91,4 +91,35 @@ public class GlobalExceptionHandler {
             com.company.salonbooking.employee.domain.exception.InvalidAvailabilityBlockException ex, HttpServletRequest request) {
         return build(HttpStatus.UNPROCESSABLE_ENTITY, "INVALID_AVAILABILITY_BLOCK", ex.getMessage(), request, List.of());
     }
+
+    @ExceptionHandler(com.company.salonbooking.scheduling.domain.exception.AppointmentConflictException.class)
+    public ResponseEntity<ErrorResponse> handleAppointmentConflict(
+            com.company.salonbooking.scheduling.domain.exception.AppointmentConflictException ex, HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT, "APPOINTMENT_CONFLICT", ex.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(com.company.salonbooking.scheduling.domain.exception.InvalidAppointmentTransitionException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidTransition(
+            com.company.salonbooking.scheduling.domain.exception.InvalidAppointmentTransitionException ex, HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT, "INVALID_APPOINTMENT_TRANSITION", ex.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(com.company.salonbooking.scheduling.domain.exception.CancellationNotAllowedException.class)
+    public ResponseEntity<ErrorResponse> handleCancellationNotAllowed(
+            com.company.salonbooking.scheduling.domain.exception.CancellationNotAllowedException ex, HttpServletRequest request) {
+        return build(HttpStatus.UNPROCESSABLE_ENTITY, "CANCELLATION_NOT_ALLOWED", ex.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(com.company.salonbooking.scheduling.domain.exception.SchedulingRuleViolationException.class)
+    public ResponseEntity<ErrorResponse> handleSchedulingRuleViolation(
+            com.company.salonbooking.scheduling.domain.exception.SchedulingRuleViolationException ex, HttpServletRequest request) {
+        return build(HttpStatus.UNPROCESSABLE_ENTITY, "SCHEDULING_RULE_VIOLATION", ex.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(
+            org.springframework.dao.DataIntegrityViolationException ex, HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT, "DATA_INTEGRITY_VIOLATION",
+                "The request conflicts with existing data.", request, List.of());
+    }
 }

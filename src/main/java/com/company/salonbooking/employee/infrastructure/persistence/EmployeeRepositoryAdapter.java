@@ -50,4 +50,10 @@ public class EmployeeRepositoryAdapter implements EmployeeRepository {
         return Employee.restore(entity.getId(), entity.getUserId(), entity.getBusinessId(), entity.getSpecialty(),
                 entity.getStatus(), entity.getCreatedAt(), entity.getUpdatedAt());
     }
+
+    @Override
+    public List<Employee> findActiveByBusinessId(UUID businessId) {
+        return jpaRepository.findByBusinessIdAndStatus(businessId, com.company.salonbooking.employee.domain.model.EmployeeStatus.ACTIVE)
+                .stream().map(this::toDomain).toList();
+    }
 }

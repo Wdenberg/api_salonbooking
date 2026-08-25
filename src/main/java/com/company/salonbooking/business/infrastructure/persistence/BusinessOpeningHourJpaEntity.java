@@ -1,11 +1,7 @@
 package com.company.salonbooking.business.infrastructure.persistence;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import org.springframework.data.domain.Persistable;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
@@ -31,6 +27,8 @@ public class BusinessOpeningHourJpaEntity {
     @Column(name = "close_time", nullable = false)
     private LocalTime closeTime;
 
+
+
     protected BusinessOpeningHourJpaEntity() {
     }
 
@@ -42,7 +40,9 @@ public class BusinessOpeningHourJpaEntity {
         this.closeTime = closeTime;
     }
 
+
     public UUID getId() { return id; }
+
     public UUID getBusinessId() { return businessId; }
     public DayOfWeek getDayOfWeek() { return dayOfWeek; }
     public LocalTime getOpenTime() { return openTime; }

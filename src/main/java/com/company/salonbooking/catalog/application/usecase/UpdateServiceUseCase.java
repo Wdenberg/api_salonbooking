@@ -4,7 +4,7 @@ import com.company.salonbooking.business.domain.exception.BusinessNotFoundExcept
 import com.company.salonbooking.business.domain.repository.BusinessRepository;
 import com.company.salonbooking.catalog.application.command.UpdateServiceCommand;
 import com.company.salonbooking.catalog.domain.exception.ServiceOfferingNotFoundException;
-import com.company.salonbooking.catalog.domain.model.Money;
+import com.company.salonbooking.shared.domain.model.Money;
 import com.company.salonbooking.catalog.domain.model.ServiceDuration;
 import com.company.salonbooking.catalog.domain.model.ServiceOffering;
 import com.company.salonbooking.catalog.domain.repository.ServiceOfferingRepository;

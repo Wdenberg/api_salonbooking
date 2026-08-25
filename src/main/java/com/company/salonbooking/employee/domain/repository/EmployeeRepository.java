@@ -14,6 +14,8 @@ public interface EmployeeRepository {
 
     List<Employee> findByBusinessId(UUID businessId, int page, int size);
 
+    List<Employee> findActiveByBusinessId(UUID businessId);
+
     boolean existsByUserIdAndBusinessId(UUID userId, UUID businessId);
 
     Employee save(Employee employee);

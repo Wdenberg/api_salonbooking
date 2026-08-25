@@ -41,7 +41,7 @@ public class OpeningHourController {
     @PutMapping
     @PreAuthorize("hasRole('OWNER')")
     public ResponseEntity<List<OpeningHourIntervalDto>> update(@PathVariable UUID businessId,
-                                                               @Valid @RequestBody List<OpeningHourIntervalDto> request,
+                                                               @RequestBody List<@Valid  OpeningHourIntervalDto> request,
                                                                @AuthenticationPrincipal AuthenticatedUser principal) {
         List<OpeningHourInterval> intervals = request.stream()
                 .map(dto -> new OpeningHourInterval(UUID.randomUUID(), dto.dayOfWeek(),

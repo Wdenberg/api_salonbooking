@@ -50,3 +50,9 @@ app:
   jwt:
     secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
     expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}
+  outbox:
+    batch-size: 50
+    max-attempts: 5
+    initial-backoff-seconds: 5
+    max-backoff-seconds: 300
+    poll-interval-millis: 5000

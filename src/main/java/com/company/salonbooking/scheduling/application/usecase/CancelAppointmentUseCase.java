@@ -4,9 +4,11 @@ import com.company.salonbooking.business.domain.repository.BusinessRepository;
 import com.company.salonbooking.business.domain.repository.BusinessSettingsRepository;
 import com.company.salonbooking.employee.domain.repository.EmployeeRepository;
 import com.company.salonbooking.scheduling.application.command.CancelAppointmentCommand;
+import com.company.salonbooking.scheduling.domain.event.AppointmentCancelledEvent;
 import com.company.salonbooking.scheduling.domain.exception.AppointmentNotFoundException;
 import com.company.salonbooking.scheduling.domain.model.Appointment;
 import com.company.salonbooking.scheduling.domain.repository.AppointmentRepository;
+import com.company.salonbooking.shared.application.port.DomainEventPublisher;
 import com.company.salonbooking.shared.exception.UnauthorizedResourceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,7 +17,6 @@ import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
 
-/** Authorized either by the customer who owns the appointment, or by the business's staff (Seção 12/16/51). */
 @Service
 public class CancelAppointmentUseCase {
 
@@ -23,15 +24,17 @@ public class CancelAppointmentUseCase {
     private final BusinessRepository businessRepository;
     private final BusinessSettingsRepository businessSettingsRepository;
     private final EmployeeRepository employeeRepository;
+    private final DomainEventPublisher domainEventPublisher;
     private final Clock clock;
 
     public CancelAppointmentUseCase(AppointmentRepository appointmentRepository, BusinessRepository businessRepository,
                                     BusinessSettingsRepository businessSettingsRepository, EmployeeRepository employeeRepository,
-                                    Clock clock) {
+                                    DomainEventPublisher domainEventPublisher, Clock clock) {
         this.appointmentRepository = appointmentRepository;
         this.businessRepository = businessRepository;
         this.businessSettingsRepository = businessSettingsRepository;
         this.employeeRepository = employeeRepository;
+        this.domainEventPublisher = domainEventPublisher;
         this.clock = clock;
     }
 
@@ -46,7 +49,12 @@ public class CancelAppointmentUseCase {
                 .orElseThrow(() -> new AppointmentNotFoundException(command.appointmentId()));
 
         appointment.cancel(Instant.now(clock), settings.getCancellationMinimumMinutes());
-        return appointmentRepository.save(appointment);
+        Appointment saved = appointmentRepository.save(appointment);
+
+        domainEventPublisher.publish(new AppointmentCancelledEvent(
+                saved.getId(), saved.getBusinessId(), saved.getCustomerId(), saved.getEmployeeId(), saved.getStartAt()));
+
+        return saved;
     }
 
     private void authorize(Appointment appointment, UUID requesterId) {

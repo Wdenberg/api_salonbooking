@@ -3,9 +3,11 @@ package com.company.salonbooking.scheduling.application.usecase;
 import com.company.salonbooking.business.domain.repository.BusinessRepository;
 import com.company.salonbooking.employee.domain.repository.EmployeeRepository;
 import com.company.salonbooking.scheduling.application.command.CompleteAppointmentCommand;
+import com.company.salonbooking.scheduling.domain.event.AppointmentCompletedEvent;
 import com.company.salonbooking.scheduling.domain.exception.AppointmentNotFoundException;
 import com.company.salonbooking.scheduling.domain.model.Appointment;
 import com.company.salonbooking.scheduling.domain.repository.AppointmentRepository;
+import com.company.salonbooking.shared.application.port.DomainEventPublisher;
 import com.company.salonbooking.shared.exception.UnauthorizedResourceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,13 +22,15 @@ public class CompleteAppointmentUseCase {
     private final AppointmentRepository appointmentRepository;
     private final BusinessRepository businessRepository;
     private final EmployeeRepository employeeRepository;
+    private final DomainEventPublisher domainEventPublisher;
     private final Clock clock;
 
     public CompleteAppointmentUseCase(AppointmentRepository appointmentRepository, BusinessRepository businessRepository,
-                                      EmployeeRepository employeeRepository, Clock clock) {
+                                      EmployeeRepository employeeRepository, DomainEventPublisher domainEventPublisher, Clock clock) {
         this.appointmentRepository = appointmentRepository;
         this.businessRepository = businessRepository;
         this.employeeRepository = employeeRepository;
+        this.domainEventPublisher = domainEventPublisher;
         this.clock = clock;
     }
 
@@ -38,7 +42,12 @@ public class CompleteAppointmentUseCase {
         authorizeStaff(appointment, command.requesterId());
 
         appointment.complete(Instant.now(clock));
-        return appointmentRepository.save(appointment);
+        Appointment saved = appointmentRepository.save(appointment);
+
+        domainEventPublisher.publish(new AppointmentCompletedEvent(
+                saved.getId(), saved.getBusinessId(), saved.getCustomerId(), saved.getEmployeeId(), saved.getStartAt()));
+
+        return saved;
     }
 
     private void authorizeStaff(Appointment appointment, UUID requesterId) {

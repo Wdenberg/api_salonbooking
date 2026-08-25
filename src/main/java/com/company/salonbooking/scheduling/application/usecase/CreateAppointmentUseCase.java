@@ -18,10 +18,12 @@ import com.company.salonbooking.employee.domain.repository.EmployeeRepository;
 import com.company.salonbooking.employee.domain.repository.EmployeeScheduleRepository;
 import com.company.salonbooking.scheduling.application.command.CreateAppointmentCommand;
 import com.company.salonbooking.scheduling.application.port.EmployeeNameResolver;
+import com.company.salonbooking.scheduling.domain.event.AppointmentCreatedEvent;
 import com.company.salonbooking.scheduling.domain.exception.AppointmentConflictException;
 import com.company.salonbooking.scheduling.domain.exception.SchedulingRuleViolationException;
 import com.company.salonbooking.scheduling.domain.model.Appointment;
 import com.company.salonbooking.scheduling.domain.repository.AppointmentRepository;
+import com.company.salonbooking.shared.application.port.DomainEventPublisher;
 import com.company.salonbooking.shared.domain.model.TimeRange;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,13 +38,16 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
+
 /**
- * Implements the CreateAppointment transaction boundary described in Seção 25:
- * validate -> create -> persist appointment -> (Outbox comes in Fase 8) -> commit.
- * The exclusion constraint is the final authority against double booking; this use
- * case's checks exist to fail fast with a clear message before ever reaching the DB
- * for the common cases (past time, outside hours, inactive resources).
+ * Implementa o limite da transação CreateAppointment descrito na Seção 25:
+ * validar -> criar -> persistir agendamento -> (Outbox entra na Fase 8) -> efetivar (commit).
+ * A restrição de exclusão é a autoridade final contra agendamentos duplicados; as verificações
+ * deste caso de uso existem para permitir uma falha rápida com uma mensagem clara, antes
+ * mesmo de acessar o banco de dados, para os casos comuns (horário passado, fora do expediente,
+ * recursos inativos).
  */
+
 @Service
 public class CreateAppointmentUseCase {
 
@@ -55,13 +60,14 @@ public class CreateAppointmentUseCase {
     private final AvailabilityBlockRepository availabilityBlockRepository;
     private final AppointmentRepository appointmentRepository;
     private final EmployeeNameResolver employeeNameResolver;
+    private final DomainEventPublisher domainEventPublisher;
     private final Clock clock;
 
     public CreateAppointmentUseCase(BusinessRepository businessRepository, BusinessSettingsRepository businessSettingsRepository,
                                     BusinessOpeningHourRepository openingHourRepository, ServiceOfferingRepository serviceRepository,
                                     EmployeeRepository employeeRepository, EmployeeScheduleRepository employeeScheduleRepository,
                                     AvailabilityBlockRepository availabilityBlockRepository, AppointmentRepository appointmentRepository,
-                                    EmployeeNameResolver employeeNameResolver, Clock clock) {
+                                    EmployeeNameResolver employeeNameResolver, DomainEventPublisher domainEventPublisher, Clock clock) {
         this.businessRepository = businessRepository;
         this.businessSettingsRepository = businessSettingsRepository;
         this.openingHourRepository = openingHourRepository;
@@ -71,6 +77,7 @@ public class CreateAppointmentUseCase {
         this.availabilityBlockRepository = availabilityBlockRepository;
         this.appointmentRepository = appointmentRepository;
         this.employeeNameResolver = employeeNameResolver;
+        this.domainEventPublisher = domainEventPublisher;
         this.clock = clock;
     }
 
@@ -105,8 +112,6 @@ public class CreateAppointmentUseCase {
 
         Instant now = Instant.now(clock);
         Instant startAt = command.startAt();
-        // endAt is always computed server-side from the service's current duration,
-        // never accepted from the client (Seção 123 — mass assignment protection).
         Instant endAt = startAt.plusSeconds(service.getDuration().asJavaDuration().toSeconds());
 
         validateAdvanceNotice(startAt, now, settings);
@@ -114,7 +119,6 @@ public class CreateAppointmentUseCase {
         validateWithinEmployeeSchedule(business.getTimezone(), startAt, endAt, employee.getId());
         validateNoBlockConflict(employee.getId(), startAt, endAt);
 
-        // Defensive pre-check (Seção 24, step 1) for a friendlier error in the common case.
         if (appointmentRepository.existsOverlapping(employee.getId(), startAt, endAt)) {
             throw new AppointmentConflictException();
         }
@@ -125,10 +129,15 @@ public class CreateAppointmentUseCase {
                 employee.getId(), service.getId(), startAt, endAt, command.notes(),
                 service.getName(), service.getPrice(), service.getDuration().toMinutes(), employeeName, now);
 
-        // Step 2 (Seção 24): attempt to persist. If a concurrent request won the race between
-        // the pre-check above and this insert, the database's exclusion constraint catches it
-        // and the adapter translates it into AppointmentConflictException -> HTTP 409.
-        return appointmentRepository.save(appointment);
+        Appointment saved = appointmentRepository.save(appointment);
+
+        // Same transaction as the insert above (Seção 25/26): if the commit fails for any
+        // reason, the outbox row never persists either — appointment and event are atomic.
+        domainEventPublisher.publish(new AppointmentCreatedEvent(
+                saved.getId(), saved.getBusinessId(), saved.getCustomerId(), saved.getEmployeeId(),
+                saved.getServiceId(), saved.getStartAt(), saved.getEndAt()));
+
+        return saved;
     }
 
     private void validateAdvanceNotice(Instant startAt, Instant now, BusinessSettings settings) {
@@ -182,7 +191,6 @@ public class CreateAppointmentUseCase {
         LocalTime startTime = ZonedDateTime.ofInstant(startAt, zone).toLocalTime();
         LocalTime endTime = ZonedDateTime.ofInstant(endAt, zone).toLocalTime();
 
-        // Appointments must not cross midnight given how opening hours/schedules are modeled per day.
         if (!ZonedDateTime.ofInstant(endAt, zone).toLocalDate().equals(date)) {
             return false;
         }

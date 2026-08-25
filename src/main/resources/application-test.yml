@@ -9,3 +9,9 @@ spring:
 logging:
   level:
     com.company.salonbooking: INFO
+app:
+  outbox:
+    # Grande o suficiente para que o poller @Scheduled nunca seja disparado espontaneamente durante os testes;
+    # testes que precisam de despacho chamam OutboxPublisherJob.dispatchBatch() diretamente para
+    # garantir asserções determinísticas e estáveis ​​(não instáveis).
+    poll-interval-millis: 3600000

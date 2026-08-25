@@ -1,5 +1,6 @@
 package com.company.salonbooking.scheduling.interfaces.rest;
 
+import com.company.salonbooking.infrastructure.idempotency.IdempotencyService;
 import com.company.salonbooking.infrastructure.security.AuthenticatedUser;
 import com.company.salonbooking.scheduling.application.command.*;
 import com.company.salonbooking.scheduling.application.usecase.*;
@@ -8,6 +9,7 @@ import com.company.salonbooking.scheduling.domain.model.AppointmentStatus;
 import com.company.salonbooking.scheduling.domain.repository.AppointmentFilter;
 import com.company.salonbooking.scheduling.interfaces.rest.dto.AppointmentResponse;
 import com.company.salonbooking.scheduling.interfaces.rest.dto.CreateAppointmentRequest;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -25,6 +27,8 @@ import java.util.UUID;
 @Tag(name = "Appointments")
 public class AppointmentController {
 
+    private static final String CREATE_APPOINTMENT_ENDPOINT = "POST /api/v1/appointments";
+
     private final CreateAppointmentUseCase createAppointmentUseCase;
     private final GetAppointmentUseCase getAppointmentUseCase;
     private final ConfirmAppointmentUseCase confirmAppointmentUseCase;
@@ -32,12 +36,14 @@ public class AppointmentController {
     private final CompleteAppointmentUseCase completeAppointmentUseCase;
     private final ListCustomerAppointmentsUseCase listCustomerAppointmentsUseCase;
     private final ListBusinessAppointmentsUseCase listBusinessAppointmentsUseCase;
+    private final IdempotencyService idempotencyService;
 
     public AppointmentController(CreateAppointmentUseCase createAppointmentUseCase, GetAppointmentUseCase getAppointmentUseCase,
                                  ConfirmAppointmentUseCase confirmAppointmentUseCase, CancelAppointmentUseCase cancelAppointmentUseCase,
                                  CompleteAppointmentUseCase completeAppointmentUseCase,
                                  ListCustomerAppointmentsUseCase listCustomerAppointmentsUseCase,
-                                 ListBusinessAppointmentsUseCase listBusinessAppointmentsUseCase) {
+                                 ListBusinessAppointmentsUseCase listBusinessAppointmentsUseCase,
+                                 IdempotencyService idempotencyService) {
         this.createAppointmentUseCase = createAppointmentUseCase;
         this.getAppointmentUseCase = getAppointmentUseCase;
         this.confirmAppointmentUseCase = confirmAppointmentUseCase;
@@ -45,18 +51,33 @@ public class AppointmentController {
         this.completeAppointmentUseCase = completeAppointmentUseCase;
         this.listCustomerAppointmentsUseCase = listCustomerAppointmentsUseCase;
         this.listBusinessAppointmentsUseCase = listBusinessAppointmentsUseCase;
+        this.idempotencyService = idempotencyService;
     }
 
     @PostMapping("/api/v1/appointments")
     @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<AppointmentResponse> create(@Valid @RequestBody CreateAppointmentRequest request,
-                                                      @AuthenticationPrincipal AuthenticatedUser principal) {
-        // customerId always comes from the authenticated principal, never from the body (Seção 124).
-        Appointment appointment = createAppointmentUseCase.execute(new CreateAppointmentCommand(
-                principal.userId(), request.businessId(), request.employeeId(), request.serviceId(),
-                request.startAt(), request.notes()));
+    public ResponseEntity<AppointmentResponse> create(
+            @Valid @RequestBody CreateAppointmentRequest request,
+            @AuthenticationPrincipal AuthenticatedUser principal,
+            @Parameter(description = "Client-generated key to safely retry this request without creating duplicates")
+            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey) {
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(AppointmentResponse.from(appointment));
+        java.util.function.Supplier<ResponseEntity<AppointmentResponse>> createAction = () -> {
+            Appointment appointment = createAppointmentUseCase.execute(new CreateAppointmentCommand(
+                    principal.userId(), request.businessId(), request.employeeId(), request.serviceId(),
+                    request.startAt(), request.notes()));
+            return ResponseEntity.status(HttpStatus.CREATED).body(AppointmentResponse.from(appointment));
+        };
+
+        if (idempotencyKey == null || idempotencyKey.isBlank()) {
+            // Idempotency-Key is optional: clients that don't send it lose the replay
+            // guarantee but the endpoint still works normally (Seção 28: "principalmente
+            // para" — a strong recommendation, not a hard requirement at the transport level).
+            return createAction.get();
+        }
+
+        return idempotencyService.execute(idempotencyKey, principal.userId(), CREATE_APPOINTMENT_ENDPOINT,
+                request, AppointmentResponse.class, createAction);
     }
 
     @GetMapping("/api/v1/appointments/{id}")

@@ -1,4 +1,10 @@
 spring:
+  rabbitmq:
+    listener:
+      simple:
+        auto-startup: false
+        acknowledge-mode: manual
+        default-requeue-rejected: false
   jpa:
     hibernate:
       ddl-auto: validate

@@ -61,7 +61,11 @@ public class OutboxPublisherJob {
 
     private void dispatchOne(OutboxEventJpaEntity entity, Instant now) {
         try {
-            messageBroker.publish(entity.getEventType(), entity.getAggregateId(), entity.getPayload());
+            messageBroker.publish(
+                    entity.getEventType(),
+                    entity.getId(),
+                    entity.getAggregateId(),
+                    entity.getPayload());
             entity.markPublished(now);
         } catch (Exception e) {
             long backoff = OutboxBackoffCalculator.computeBackoffSeconds(

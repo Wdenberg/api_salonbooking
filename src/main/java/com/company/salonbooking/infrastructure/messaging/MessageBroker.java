@@ -11,5 +11,5 @@ import java.util.UUID;
 
 public interface MessageBroker {
 
-    void publish(String eventType, UUID aggregateId, String payloadJson);
+    void publish(String eventType, UUID eventId,  UUID aggregateId, String payloadJson);
 }

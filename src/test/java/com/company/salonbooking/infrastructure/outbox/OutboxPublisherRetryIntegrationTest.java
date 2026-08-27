@@ -33,7 +33,7 @@ class OutboxPublisherRetryIntegrationTest extends com.company.salonbooking.Abstr
     @Transactional
     void eventoDeveSerReagendadoAposFalhaEMarcadoFailedAposEsgotarTentativas() {
         doThrow(new RuntimeException("broker unavailable")).when(messageBroker)
-                .publish(anyString(), any(UUID.class), anyString());
+                .publish(anyString(), any(UUID.class), any(UUID.class), anyString());
 
         MutableClock mutableClock = (MutableClock) clock;
         // O clock já foi inicializado com Instant.now() no bean @Primary

@@ -61,3 +61,7 @@ app:
     initial-backoff-seconds: 5
     max-backoff-seconds: 300
     poll-interval-millis: 5000
+  reminders:
+    h24-offset-minutes: 1440   # 24 hours
+    h2-offset-minutes: 120     # 2 hours
+    poll-interval-millis: 300000  # 5 minutes

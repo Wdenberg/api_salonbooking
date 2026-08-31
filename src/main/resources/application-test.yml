@@ -21,3 +21,7 @@ app:
     # testes que precisam de despacho chamam OutboxPublisherJob.dispatchBatch() diretamente para
     # garantir asserções determinísticas e estáveis ​​(não instáveis).
     poll-interval-millis: 3600000
+  reminders:
+    # Large enough that the scheduler never fires spontaneously mid-test;
+    # tests trigger ReminderSchedulerJob.dispatchDueReminders() directly.
+    poll-interval-millis: 3600000

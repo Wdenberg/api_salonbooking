@@ -79,4 +79,9 @@ public class AppointmentRepositoryAdapter implements AppointmentRepository {
                 Money.of(e.getServicePriceAmountSnapshot(), e.getServicePriceCurrencySnapshot()),
                 e.getServiceDurationMinutesSnapshot(), e.getEmployeeNameSnapshot(), e.getCreatedAt(), e.getUpdatedAt());
     }
+
+    @Override
+    public List<Appointment> findConfirmedStartingBetween(Instant from, Instant to) {
+        return jpaRepository.findConfirmedStartingBetween(from, to).stream().map(this::toDomain).toList();
+    }
 }

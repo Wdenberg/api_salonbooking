@@ -40,6 +40,8 @@ public final class RabbitMqTopology {
     public static final String ROUTING_KEY_APPOINTMENT_ALL = "appointment.*";
     public static final String ROUTING_KEY_REPORT_REQUESTED = "report.requested";
 
+    public static final String ROUTING_KEY_REMINDER_REQUESTED = "reminder.requested";
+
     public static String appointmentRoutingKey(String eventType) {
         // Se já começar com "appointment.", retorna diretamente (caso já esteja no formato final)
         if (eventType.startsWith("appointment.")) {

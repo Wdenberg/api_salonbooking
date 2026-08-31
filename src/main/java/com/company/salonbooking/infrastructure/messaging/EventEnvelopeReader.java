@@ -16,7 +16,7 @@ public class EventEnvelopeReader {
         this.objectMapper = objectMapper;
     }
 
-    public record EnvelopeHeader(UUID eventId, String eventType, JsonNode payload) {}
+    public record EnvelopeHeader(UUID eventId, String eventType, UUID aggregateId, JsonNode payload) {}
 
     public EnvelopeHeader read(String json) {
         try {
@@ -24,7 +24,8 @@ public class EventEnvelopeReader {
             UUID eventId = UUID.fromString(root.get("eventId").asText());
             String eventType = root.get("eventType").asText();
             JsonNode payload = root.get("payload");
-            return new EnvelopeHeader(eventId, eventType, payload);
+            UUID aggregateId = UUID.fromString(root.get("aggregateId").asText());
+            return new EnvelopeHeader(eventId, eventType,aggregateId, payload);
         } catch (Exception e) {
             throw new IllegalArgumentException("Malformed event envelope", e);
         }

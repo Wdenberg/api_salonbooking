@@ -27,4 +27,7 @@ public interface AppointmentRepository {
     List<Appointment> findByCustomerId(UUID customerId, AppointmentFilter filter, int page, int size);
 
     List<Appointment> findByBusinessId(UUID businessId, AppointmentFilter filter, int page, int size);
+
+    List<Appointment> findConfirmedStartingBetween(Instant from, Instant to);
+
 }

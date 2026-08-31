@@ -21,4 +21,7 @@ public interface AppointmentJpaRepository extends JpaRepository<AppointmentJpaEn
     @Query("SELECT COUNT(a) > 0 FROM AppointmentJpaEntity a WHERE a.employeeId = :employeeId " +
             "AND a.status IN ('PENDING','CONFIRMED') AND a.startAt < :endAt AND a.endAt > :startAt")
     boolean existsOverlapping(@Param("employeeId") UUID employeeId, @Param("startAt") Instant startAt, @Param("endAt") Instant endAt);
+
+    @Query("SELECT a FROM AppointmentJpaEntity a WHERE a.status = 'CONFIRMED' AND a.startAt BETWEEN :from AND :to")
+    List<AppointmentJpaEntity> findConfirmedStartingBetween(@Param("from") Instant from, @Param("to") Instant to);
 }

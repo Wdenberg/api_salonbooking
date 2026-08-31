@@ -156,4 +156,10 @@ public class RabbitMqTopologyConfig {
         return BindingBuilder.bind(reportGenerationRetryQueue())
                 .to(reportGenerationRetryExchange()).with(REPORT_GENERATION_RETRY_QUEUE);
     }
+
+    @Bean
+    public Binding appointmentReminderBinding() {
+        return BindingBuilder.bind(appointmentReminderQueue())
+                .to(notificationEventsExchange()).with(ROUTING_KEY_REMINDER_REQUESTED);
+    }
 }

@@ -52,6 +52,12 @@ springdoc:
     path: /v3/api-docs
 
 app:
+  cache:
+    business-settings-ttl-seconds: 600
+    business-opening-hours-ttl-seconds: 600
+    catalog-services-ttl-seconds: 120
+    catalog-business-services-ttl-seconds: 120
+    default-max-entries: 10000
   jwt:
     secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
     expiration-seconds: ${JWT_EXPIRATION_SECONDS:3600}

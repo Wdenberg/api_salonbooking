@@ -134,4 +134,10 @@ public class GlobalExceptionHandler {
             com.company.salonbooking.infrastructure.idempotency.IdempotencyKeyMismatchException ex, HttpServletRequest request) {
         return build(HttpStatus.UNPROCESSABLE_ENTITY, "IDEMPOTENCY_KEY_MISMATCH", ex.getMessage(), request, List.of());
     }
+
+    @ExceptionHandler(com.company.salonbooking.reporting.domain.exception.InvalidReportRequestException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidReportRequest(
+            com.company.salonbooking.reporting.domain.exception.InvalidReportRequestException ex, HttpServletRequest request) {
+        return build(HttpStatus.UNPROCESSABLE_ENTITY, "INVALID_REPORT_REQUEST", ex.getMessage(), request, List.of());
+    }
 }

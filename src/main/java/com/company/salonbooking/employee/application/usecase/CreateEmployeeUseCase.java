@@ -1,5 +1,6 @@
 package com.company.salonbooking.employee.application.usecase;
 
+import com.company.salonbooking.audit.domain.model.AuditAction;
 import com.company.salonbooking.business.domain.exception.BusinessNotFoundException;
 import com.company.salonbooking.business.domain.model.Business;
 import com.company.salonbooking.business.domain.repository.BusinessRepository;
@@ -12,6 +13,7 @@ import com.company.salonbooking.identity.domain.exception.EmailAlreadyExistsExce
 import com.company.salonbooking.identity.domain.model.Role;
 import com.company.salonbooking.identity.domain.model.User;
 import com.company.salonbooking.identity.domain.repository.UserRepository;
+import com.company.salonbooking.shared.application.port.AuditRecorder;
 import com.company.salonbooking.shared.exception.UnauthorizedResourceException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,16 +36,18 @@ public class CreateEmployeeUseCase {
     private final UserRepository userRepository;
     private final PasswordHasher passwordHasher;
     private final TokenIssuer tokenIssuer;
+    private final AuditRecorder auditRecorder;
     private final Clock clock;
 
     public CreateEmployeeUseCase(BusinessRepository businessRepository, EmployeeRepository employeeRepository,
                                  UserRepository userRepository, PasswordHasher passwordHasher,
-                                 TokenIssuer tokenIssuer, Clock clock) {
+                                 TokenIssuer tokenIssuer, AuditRecorder auditRecorder, Clock clock) {
         this.businessRepository = businessRepository;
         this.employeeRepository = employeeRepository;
         this.userRepository = userRepository;
         this.passwordHasher = passwordHasher;
         this.tokenIssuer = tokenIssuer;
+        this.auditRecorder = auditRecorder;
         this.clock = clock;
     }
 
@@ -67,6 +71,11 @@ public class CreateEmployeeUseCase {
         User savedUser = userRepository.save(user);
 
         Employee employee = Employee.create(UUID.randomUUID(), savedUser.getId(), business.getId(), command.specialty(), now);
-        return employeeRepository.save(employee);
+
+        Employee saved = employeeRepository.save(employee);
+        auditRecorder.record(command.requesterId(), business.getId(), AuditAction.CREATE_EMPLOYEE, "Employee",
+                saved.getId(), null);
+
+        return saved;
     }
 }

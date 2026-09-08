@@ -1,5 +1,6 @@
 package com.company.salonbooking.scheduling.application.usecase;
 
+import com.company.salonbooking.audit.domain.model.AuditAction;
 import com.company.salonbooking.business.domain.repository.BusinessRepository;
 import com.company.salonbooking.employee.domain.repository.EmployeeRepository;
 import com.company.salonbooking.scheduling.application.command.CompleteAppointmentCommand;
@@ -7,6 +8,7 @@ import com.company.salonbooking.scheduling.domain.event.AppointmentCompletedEven
 import com.company.salonbooking.scheduling.domain.exception.AppointmentNotFoundException;
 import com.company.salonbooking.scheduling.domain.model.Appointment;
 import com.company.salonbooking.scheduling.domain.repository.AppointmentRepository;
+import com.company.salonbooking.shared.application.port.AuditRecorder;
 import com.company.salonbooking.shared.application.port.DomainEventPublisher;
 import com.company.salonbooking.shared.exception.UnauthorizedResourceException;
 import org.springframework.stereotype.Service;
@@ -23,14 +25,16 @@ public class CompleteAppointmentUseCase {
     private final BusinessRepository businessRepository;
     private final EmployeeRepository employeeRepository;
     private final DomainEventPublisher domainEventPublisher;
+    private final AuditRecorder auditRecorder;
     private final Clock clock;
 
     public CompleteAppointmentUseCase(AppointmentRepository appointmentRepository, BusinessRepository businessRepository,
-                                      EmployeeRepository employeeRepository, DomainEventPublisher domainEventPublisher, Clock clock) {
+                                      EmployeeRepository employeeRepository, DomainEventPublisher domainEventPublisher, AuditRecorder auditRecorder, Clock clock) {
         this.appointmentRepository = appointmentRepository;
         this.businessRepository = businessRepository;
         this.employeeRepository = employeeRepository;
         this.domainEventPublisher = domainEventPublisher;
+        this.auditRecorder = auditRecorder;
         this.clock = clock;
     }
 
@@ -47,6 +51,8 @@ public class CompleteAppointmentUseCase {
         domainEventPublisher.publish(new AppointmentCompletedEvent(
                 saved.getId(), saved.getBusinessId(), saved.getCustomerId(), saved.getEmployeeId(), saved.getStartAt()));
 
+        auditRecorder.record(command.requesterId(), saved.getBusinessId(), AuditAction.COMPLETE_APPOINTMENT,
+                "Appointment", saved.getId(), null);
         return saved;
     }
 

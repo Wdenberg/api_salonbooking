@@ -8,6 +8,7 @@ import com.company.salonbooking.identity.domain.exception.InvalidCredentialsExce
 import com.company.salonbooking.identity.domain.model.Role;
 import com.company.salonbooking.identity.domain.model.User;
 import com.company.salonbooking.identity.domain.repository.UserRepository;
+import com.company.salonbooking.shared.application.port.AuditRecorder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,12 +29,13 @@ class LoginUseCaseTest {
     @Mock private UserRepository userRepository;
     @Mock private PasswordHasher passwordHasher;
     @Mock private TokenIssuer tokenIssuer;
+    @Mock private AuditRecorder auditRecorder;
 
     private LoginUseCase useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new LoginUseCase(userRepository, passwordHasher, tokenIssuer);
+        useCase = new LoginUseCase(userRepository, passwordHasher, tokenIssuer, auditRecorder);
     }
 
     @Test

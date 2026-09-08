@@ -39,7 +39,11 @@ public class RabbitMqMessageBroker implements MessageBroker {
         String exchange;
         String routingKey;
 
-        if (eventType.equals("AppointmentReminderRequested")) {
+        if(eventType.equals("ReportRequested")){
+            exchange = REPORT_EVENTS_EXCHANGE;
+            routingKey = ROUTING_KEY_REPORT_REQUESTED;
+        }
+        else if (eventType.equals("AppointmentReminderRequested")) {
 
             exchange = NOTIFICATION_EVENTS_EXCHANGE;
             routingKey = ROUTING_KEY_REMINDER_REQUESTED;

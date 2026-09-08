@@ -1,5 +1,6 @@
 package com.company.salonbooking.reporting.application.usecase;
 
+import com.company.salonbooking.audit.domain.model.AuditAction;
 import com.company.salonbooking.business.domain.exception.BusinessNotFoundException;
 import com.company.salonbooking.business.domain.model.Business;
 import com.company.salonbooking.business.domain.repository.BusinessRepository;
@@ -8,6 +9,7 @@ import com.company.salonbooking.reporting.domain.event.ReportRequestedEvent;
 import com.company.salonbooking.reporting.domain.exception.InvalidReportRequestException;
 import com.company.salonbooking.reporting.domain.model.ReportJob;
 import com.company.salonbooking.reporting.domain.repository.ReportJobRepository;
+import com.company.salonbooking.shared.application.port.AuditRecorder;
 import com.company.salonbooking.shared.application.port.DomainEventPublisher;
 import com.company.salonbooking.shared.exception.UnauthorizedResourceException;
 import org.springframework.stereotype.Service;
@@ -34,13 +36,15 @@ public class GenerateReportUseCase {
     private final BusinessRepository businessRepository;
     private final ReportJobRepository reportJobRepository;
     private final DomainEventPublisher domainEventPublisher;
+    private final AuditRecorder auditRecorder;
     private final Clock clock;
 
     public GenerateReportUseCase(BusinessRepository businessRepository, ReportJobRepository reportJobRepository,
-                                 DomainEventPublisher domainEventPublisher, Clock clock) {
+                                 DomainEventPublisher domainEventPublisher, AuditRecorder auditRecorder, Clock clock) {
         this.businessRepository = businessRepository;
         this.reportJobRepository = reportJobRepository;
         this.domainEventPublisher = domainEventPublisher;
+        this.auditRecorder = auditRecorder;
         this.clock = clock;
     }
 
@@ -63,7 +67,8 @@ public class GenerateReportUseCase {
 
         domainEventPublisher.publish(new ReportRequestedEvent(
                 saved.getId(), saved.getBusinessId(), saved.getType().name(), saved.getStartDate(), saved.getEndDate()));
-
+        auditRecorder.record(command.requesterId(), saved.getBusinessId(), AuditAction.GENERATE_REPORT,
+                "ReportJob", saved.getId(), "{\"type\":\"" + saved.getType() + "\"}");
         return saved;
     }
 

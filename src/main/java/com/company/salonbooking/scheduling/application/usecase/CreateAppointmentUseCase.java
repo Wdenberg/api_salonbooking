@@ -1,5 +1,6 @@
 package com.company.salonbooking.scheduling.application.usecase;
 
+import com.company.salonbooking.audit.domain.model.AuditAction;
 import com.company.salonbooking.business.domain.exception.BusinessNotFoundException;
 import com.company.salonbooking.business.domain.model.Business;
 import com.company.salonbooking.business.domain.model.BusinessSettings;
@@ -23,6 +24,7 @@ import com.company.salonbooking.scheduling.domain.exception.AppointmentConflictE
 import com.company.salonbooking.scheduling.domain.exception.SchedulingRuleViolationException;
 import com.company.salonbooking.scheduling.domain.model.Appointment;
 import com.company.salonbooking.scheduling.domain.repository.AppointmentRepository;
+import com.company.salonbooking.shared.application.port.AuditRecorder;
 import com.company.salonbooking.shared.application.port.DomainEventPublisher;
 import com.company.salonbooking.shared.domain.model.TimeRange;
 import org.springframework.stereotype.Service;
@@ -61,13 +63,14 @@ public class CreateAppointmentUseCase {
     private final AppointmentRepository appointmentRepository;
     private final EmployeeNameResolver employeeNameResolver;
     private final DomainEventPublisher domainEventPublisher;
+    private final AuditRecorder auditRecorder;
     private final Clock clock;
 
     public CreateAppointmentUseCase(BusinessRepository businessRepository, BusinessSettingsRepository businessSettingsRepository,
                                     BusinessOpeningHourRepository openingHourRepository, ServiceOfferingRepository serviceRepository,
                                     EmployeeRepository employeeRepository, EmployeeScheduleRepository employeeScheduleRepository,
                                     AvailabilityBlockRepository availabilityBlockRepository, AppointmentRepository appointmentRepository,
-                                    EmployeeNameResolver employeeNameResolver, DomainEventPublisher domainEventPublisher, Clock clock) {
+                                    EmployeeNameResolver employeeNameResolver, DomainEventPublisher domainEventPublisher, AuditRecorder auditRecorder, Clock clock) {
         this.businessRepository = businessRepository;
         this.businessSettingsRepository = businessSettingsRepository;
         this.openingHourRepository = openingHourRepository;
@@ -78,6 +81,7 @@ public class CreateAppointmentUseCase {
         this.appointmentRepository = appointmentRepository;
         this.employeeNameResolver = employeeNameResolver;
         this.domainEventPublisher = domainEventPublisher;
+        this.auditRecorder = auditRecorder;
         this.clock = clock;
     }
 
@@ -136,7 +140,8 @@ public class CreateAppointmentUseCase {
         domainEventPublisher.publish(new AppointmentCreatedEvent(
                 saved.getId(), saved.getBusinessId(), saved.getCustomerId(), saved.getEmployeeId(),
                 saved.getServiceId(), saved.getStartAt(), saved.getEndAt()));
-
+        auditRecorder.record(command.requesterId(), saved.getBusinessId(), AuditAction.CREATE_APPOINTMENT,
+                "Appointment", saved.getId(), null);
         return saved;
     }
 

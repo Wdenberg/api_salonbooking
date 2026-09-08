@@ -1,5 +1,6 @@
 package com.company.salonbooking.scheduling.application.usecase;
 
+import com.company.salonbooking.audit.domain.model.AuditAction;
 import com.company.salonbooking.business.domain.repository.BusinessRepository;
 import com.company.salonbooking.business.domain.repository.BusinessSettingsRepository;
 import com.company.salonbooking.employee.domain.repository.EmployeeRepository;
@@ -8,6 +9,7 @@ import com.company.salonbooking.scheduling.domain.event.AppointmentCancelledEven
 import com.company.salonbooking.scheduling.domain.exception.AppointmentNotFoundException;
 import com.company.salonbooking.scheduling.domain.model.Appointment;
 import com.company.salonbooking.scheduling.domain.repository.AppointmentRepository;
+import com.company.salonbooking.shared.application.port.AuditRecorder;
 import com.company.salonbooking.shared.application.port.DomainEventPublisher;
 import com.company.salonbooking.shared.exception.UnauthorizedResourceException;
 import org.springframework.stereotype.Service;
@@ -25,16 +27,18 @@ public class CancelAppointmentUseCase {
     private final BusinessSettingsRepository businessSettingsRepository;
     private final EmployeeRepository employeeRepository;
     private final DomainEventPublisher domainEventPublisher;
+    private final AuditRecorder auditRecorder;
     private final Clock clock;
 
     public CancelAppointmentUseCase(AppointmentRepository appointmentRepository, BusinessRepository businessRepository,
                                     BusinessSettingsRepository businessSettingsRepository, EmployeeRepository employeeRepository,
-                                    DomainEventPublisher domainEventPublisher, Clock clock) {
+                                    DomainEventPublisher domainEventPublisher, AuditRecorder auditRecorder, Clock clock) {
         this.appointmentRepository = appointmentRepository;
         this.businessRepository = businessRepository;
         this.businessSettingsRepository = businessSettingsRepository;
         this.employeeRepository = employeeRepository;
         this.domainEventPublisher = domainEventPublisher;
+        this.auditRecorder = auditRecorder;
         this.clock = clock;
     }
 
@@ -54,6 +58,8 @@ public class CancelAppointmentUseCase {
         domainEventPublisher.publish(new AppointmentCancelledEvent(
                 saved.getId(), saved.getBusinessId(), saved.getCustomerId(), saved.getEmployeeId(), saved.getStartAt()));
 
+        auditRecorder.record(command.requesterId(), saved.getBusinessId(), AuditAction.CANCEL_APPOINTMENT,
+                "Appointment", saved.getId(), null);
         return saved;
     }
 

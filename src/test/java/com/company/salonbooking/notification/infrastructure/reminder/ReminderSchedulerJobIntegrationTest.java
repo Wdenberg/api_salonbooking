@@ -10,12 +10,13 @@ import com.company.salonbooking.identity.interfaces.rest.dto.RegisterCustomerReq
 import com.company.salonbooking.identity.interfaces.rest.dto.RegisterOwnerRequest;
 import com.company.salonbooking.infrastructure.outbox.OutboxEventJpaRepository;
 import com.company.salonbooking.scheduling.interfaces.rest.dto.CreateAppointmentRequest;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import tools.jackson.databind.ObjectMapper;
 
 import java.math.BigDecimal;
 import java.time.DayOfWeek;
@@ -138,7 +139,7 @@ class ReminderSchedulerJobIntegrationTest extends AbstractIntegrationTest {
                         .header("Authorization", "Bearer " + ownerToken)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
-                                new CreateBusinessRequest("Barbearia Lembrete", null, null, null, null, "UTC"))))
+                                new CreateBusinessRequest("Barbearia Lembrete", null, null, null, null, "America/Sao_Paulo"))))
                 .andExpect(status().isCreated())
                 .andReturn();
         return objectMapper.readTree(result.getResponse().getContentAsString()).get("id").asText();

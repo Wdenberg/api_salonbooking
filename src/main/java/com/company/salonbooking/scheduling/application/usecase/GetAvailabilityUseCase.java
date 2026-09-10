@@ -14,7 +14,6 @@ import com.company.salonbooking.employee.domain.repository.AvailabilityBlockRepo
 import com.company.salonbooking.employee.domain.repository.EmployeeRepository;
 import com.company.salonbooking.employee.domain.repository.EmployeeScheduleRepository;
 import com.company.salonbooking.scheduling.application.query.GetAvailabilityQuery;
-import com.company.salonbooking.scheduling.domain.model.Appointment;
 import com.company.salonbooking.scheduling.domain.model.TimeSlot;
 import com.company.salonbooking.scheduling.domain.repository.AppointmentRepository;
 import com.company.salonbooking.scheduling.domain.service.AvailabilityCalculator;

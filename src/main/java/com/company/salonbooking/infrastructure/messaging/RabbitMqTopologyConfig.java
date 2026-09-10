@@ -4,8 +4,6 @@ import org.springframework.amqp.core.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.Map;
-
 import static com.company.salonbooking.infrastructure.messaging.RabbitMqTopology.*;
 
 /**

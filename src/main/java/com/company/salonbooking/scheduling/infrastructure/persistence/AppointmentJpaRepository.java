@@ -1,6 +1,5 @@
 package com.company.salonbooking.scheduling.infrastructure.persistence;
 
-import com.company.salonbooking.scheduling.domain.model.AppointmentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;

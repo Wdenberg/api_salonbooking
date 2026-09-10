@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE module PUBLIC
+        "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+        "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+
+    <!-- ==========================================================
+         GLOBAL CONFIGURATION
+         ========================================================== -->
+
+    <property name="charset" value="UTF-8"/>
+
+    <!-- Every configured violation is a build-blocking error. -->
+    <property name="severity" value="error"/>
+
+    <!-- ==========================================================
+         FILE-LEVEL RULES
+         ========================================================== -->
+
+    <!-- Tabs are not allowed in source files. -->
+    <module name="FileTabCharacter"/>
+
+    <!-- Every source file must end with a newline. -->
+    <module name="NewlineAtEndOfFile"/>
+
+    <!-- ==========================================================
+         JAVA SOURCE RULES
+         ========================================================== -->
+
+    <module name="TreeWalker">
+
+        <!-- ======================================================
+             IMPORTS
+             ====================================================== -->
+
+        <!-- No unused imports. -->
+        <module name="UnusedImports"/>
+
+        <!-- No duplicated/redundant imports. -->
+        <module name="RedundantImport"/>
+
+
+        <!-- ======================================================
+             NAMING
+             ====================================================== -->
+
+        <!-- package names: lowercase and dot-separated -->
+        <module name="PackageName">
+            <property
+                    name="format"
+                    value="^[a-z]+(\.[a-z][a-z0-9]*)*$"/>
+        </module>
+
+        <!-- Classes, interfaces, enums and records -->
+        <module name="TypeName">
+            <property
+                    name="format"
+                    value="^[A-Z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- Methods -->
+        <module name="MethodName">
+            <property
+                    name="format"
+                    value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- Local variables -->
+        <module name="LocalVariableName">
+            <property
+                    name="format"
+                    value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- Method/constructor parameters -->
+        <module name="ParameterName">
+            <property
+                    name="format"
+                    value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- Instance fields -->
+        <module name="MemberName">
+            <property
+                    name="format"
+                    value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+
+        <!-- static final constants -->
+        <module name="ConstantName">
+            <property
+                    name="format"
+                    value="^(log|[A-Z][A-Z0-9]*(_[A-Z0-9]+)*)$"/>
+        </module>
+
+
+        <!-- ======================================================
+             MODIFIERS / DECLARATION
+             ====================================================== -->
+
+        <!-- Consistent modifier ordering. -->
+        <module name="ModifierOrder"/>
+
+
+        <!-- ======================================================
+             COMPLEXITY
+             ====================================================== -->
+
+        <!--
+            Maximum cyclomatic complexity per method/constructor.
+
+            15 is intentionally permissive enough for application
+            services while still preventing excessive branching.
+        -->
+        <module name="CyclomaticComplexity">
+            <property name="max" value="15"/>
+        </module>
+
+        <!--
+            Prevent excessively large methods/constructors.
+
+            120 lines keeps the rule practical for use cases,
+            controllers and integration code.
+        -->
+        <module name="MethodLength">
+            <property name="max" value="120"/>
+            <property name="countEmpty" value="false"/>
+        </module>
+
+
+    </module>
+
+</module>

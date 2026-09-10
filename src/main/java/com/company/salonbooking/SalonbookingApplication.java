@@ -18,15 +18,15 @@ import org.springframework.context.annotation.Bean;
 @ConfigurationPropertiesScan
 public class SalonbookingApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(SalonbookingApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(SalonbookingApplication.class, args);
+    }
 
-	@Bean
-	public ObjectMapper objectMapper() {
-		ObjectMapper mapper = new ObjectMapper();
-		mapper.registerModule(new JavaTimeModule());
-		return mapper;
-	}
+    @Bean
+    public ObjectMapper objectMapper() {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        return mapper;
+    }
 
 }

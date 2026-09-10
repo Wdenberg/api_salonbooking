@@ -1,7 +1,6 @@
 package com.company.salonbooking.business.infrastructure.persistence;
 
 import jakarta.persistence.*;
-import org.springframework.data.domain.Persistable;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;

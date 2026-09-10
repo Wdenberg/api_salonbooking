@@ -1,5 +1,6 @@
 package com.company.salonbooking.reporting.application.usecase;
 
+import com.company.salonbooking.infrastructure.metrics.AppMetrics;
 import com.company.salonbooking.reporting.application.port.ReportGenerator;
 import com.company.salonbooking.reporting.domain.exception.ReportJobNotFoundException;
 import com.company.salonbooking.reporting.domain.model.ReportJob;
@@ -24,12 +25,14 @@ public class ProcessReportUseCase {
     private final ReportJobRepository reportJobRepository;
     private final Map<com.company.salonbooking.reporting.domain.model.ReportType, ReportGenerator> generatorsByType;
     private final Clock clock;
+    private final AppMetrics appMetrics;
 
-    public ProcessReportUseCase(ReportJobRepository reportJobRepository, List<ReportGenerator> generators, Clock clock) {
+    public ProcessReportUseCase(ReportJobRepository reportJobRepository, List<ReportGenerator> generators, Clock clock, AppMetrics appMetrics) {
         this.reportJobRepository = reportJobRepository;
         this.generatorsByType = generators.stream()
                 .collect(java.util.stream.Collectors.toMap(ReportGenerator::supports, g -> g));
         this.clock = clock;
+        this.appMetrics = appMetrics;
     }
 
     @Transactional
@@ -51,6 +54,7 @@ public class ProcessReportUseCase {
         if (generator == null) {
             job.markFailed("No generator registered for report type " + job.getType(), Instant.now(clock));
             reportJobRepository.save(job);
+            appMetrics.incrementNotificationFailed();
             return;
         }
 
@@ -58,8 +62,10 @@ public class ProcessReportUseCase {
             String resultData = generator.generate(job);
             String resultLocation = "inline://report-jobs/" + job.getId();
             job.markCompleted(resultLocation, resultData, Instant.now(clock));
+            appMetrics.incrementAppointmentCompleted();
         } catch (Exception e) {
             job.markFailed("Report generation failed: " + e.getMessage(), Instant.now(clock));
+            appMetrics.incrementNotificationFailed();
         }
 
         reportJobRepository.save(job);

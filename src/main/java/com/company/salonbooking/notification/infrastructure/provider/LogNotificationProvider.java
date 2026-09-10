@@ -1,5 +1,6 @@
 package com.company.salonbooking.notification.infrastructure.provider;
 
+import com.company.salonbooking.infrastructure.metrics.AppMetrics;
 import com.company.salonbooking.notification.application.port.NotificationProvider;
 import com.company.salonbooking.notification.domain.model.Notification;
 import org.slf4j.Logger;
@@ -16,10 +17,21 @@ import org.springframework.stereotype.Component;
 public class LogNotificationProvider implements NotificationProvider {
 
     private static final Logger log = LoggerFactory.getLogger(LogNotificationProvider.class);
+    private final AppMetrics appMetrics;
+
+    public LogNotificationProvider(AppMetrics appMetrics) {
+        this.appMetrics = appMetrics;
+    }
 
     @Override
     public void send(Notification notification) {
-        log.info("[notification] to userId={} type={} subject=\"{}\" body=\"{}\"",
-                notification.getRecipientUserId(), notification.getType(), notification.getSubject(), notification.getBody());
+        try {
+            log.info("[notification] to userId={} type={} subject=\"{}\" body=\"{}\"",
+                    notification.getRecipientUserId(), notification.getType(), notification.getSubject(), notification.getBody());
+            appMetrics.incrementNotificationFailed();
+        }catch (Exception e){
+            appMetrics.incrementNotificationFailed();
+            throw e;
+        }
     }
 }

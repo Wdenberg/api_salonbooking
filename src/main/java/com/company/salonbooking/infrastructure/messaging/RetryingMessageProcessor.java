@@ -1,5 +1,6 @@
 package com.company.salonbooking.infrastructure.messaging;
 
+import com.company.salonbooking.infrastructure.metrics.AppMetrics;
 import com.company.salonbooking.infrastructure.outbox.OutboxBackoffCalculator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,13 +31,16 @@ public class RetryingMessageProcessor {
     private static final long MAX_BACKOFF_SECONDS = 300;
 
     private final RabbitTemplate rabbitTemplate;
+    private final AppMetrics appMetrics;
 
-    public RetryingMessageProcessor(RabbitTemplate rabbitTemplate) {
+    public RetryingMessageProcessor(RabbitTemplate rabbitTemplate, AppMetrics appMetrics) {
         this.rabbitTemplate = rabbitTemplate;
+        this.appMetrics = appMetrics;
     }
 
     public void handleFailure(Message message, String retryExchange, String retryRoutingKey, String finalDlq,
                               String consumerName, Exception cause) {
+        appMetrics.incrementNotificationFailed();
         int attempt = currentAttempt(message) + 1;
 
         if (attempt >= MAX_ATTEMPTS) {

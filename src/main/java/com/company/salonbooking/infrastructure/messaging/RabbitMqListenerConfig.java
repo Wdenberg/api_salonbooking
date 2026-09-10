@@ -27,9 +27,12 @@ public class RabbitMqListenerConfig {
     }
 
     @Bean
-    public org.springframework.amqp.rabbit.core.RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory) {
+    public org.springframework.amqp.rabbit.core.RabbitTemplate rabbitTemplate(ConnectionFactory connectionFactory,
+                                                                              CorrelationIdMessagePostProcessor correlationIdMessagePostProcessor) {
+
         var template = new org.springframework.amqp.rabbit.core.RabbitTemplate(connectionFactory);
         template.setMessageConverter(new JacksonJsonMessageConverter());
+        template.setBeforePublishPostProcessors(correlationIdMessagePostProcessor);
         return template;
     }
 }

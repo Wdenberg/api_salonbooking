@@ -14,5 +14,6 @@ spring:
     password: ${RABBITMQ_PASSWORD:guest}
 
 logging:
-  level:
-    com.company.salonbooking: DEBUG
+  structured:
+    format:
+      console:   # unset in dev: human-readable console output is easier to read locally

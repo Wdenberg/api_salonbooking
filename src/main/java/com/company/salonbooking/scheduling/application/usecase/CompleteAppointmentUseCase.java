@@ -3,6 +3,7 @@ package com.company.salonbooking.scheduling.application.usecase;
 import com.company.salonbooking.audit.domain.model.AuditAction;
 import com.company.salonbooking.business.domain.repository.BusinessRepository;
 import com.company.salonbooking.employee.domain.repository.EmployeeRepository;
+import com.company.salonbooking.infrastructure.metrics.AppMetrics;
 import com.company.salonbooking.scheduling.application.command.CompleteAppointmentCommand;
 import com.company.salonbooking.scheduling.domain.event.AppointmentCompletedEvent;
 import com.company.salonbooking.scheduling.domain.exception.AppointmentNotFoundException;
@@ -26,15 +27,17 @@ public class CompleteAppointmentUseCase {
     private final EmployeeRepository employeeRepository;
     private final DomainEventPublisher domainEventPublisher;
     private final AuditRecorder auditRecorder;
+    private final AppMetrics appMetrics;
     private final Clock clock;
 
     public CompleteAppointmentUseCase(AppointmentRepository appointmentRepository, BusinessRepository businessRepository,
-                                      EmployeeRepository employeeRepository, DomainEventPublisher domainEventPublisher, AuditRecorder auditRecorder, Clock clock) {
+                                      EmployeeRepository employeeRepository, DomainEventPublisher domainEventPublisher, AuditRecorder auditRecorder, AppMetrics appMetrics, Clock clock) {
         this.appointmentRepository = appointmentRepository;
         this.businessRepository = businessRepository;
         this.employeeRepository = employeeRepository;
         this.domainEventPublisher = domainEventPublisher;
         this.auditRecorder = auditRecorder;
+        this.appMetrics = appMetrics;
         this.clock = clock;
     }
 
@@ -47,7 +50,7 @@ public class CompleteAppointmentUseCase {
 
         appointment.complete(Instant.now(clock));
         Appointment saved = appointmentRepository.save(appointment);
-
+        appMetrics.incrementAppointmentCompleted();
         domainEventPublisher.publish(new AppointmentCompletedEvent(
                 saved.getId(), saved.getBusinessId(), saved.getCustomerId(), saved.getEmployeeId(), saved.getStartAt()));
 

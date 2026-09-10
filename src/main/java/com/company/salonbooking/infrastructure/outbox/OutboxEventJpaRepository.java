@@ -27,4 +27,8 @@ public interface OutboxEventJpaRepository extends JpaRepository<OutboxEventJpaEn
     List<OutboxEventJpaEntity> lockNextBatch(@Param("now") Instant now, @Param("batchSize") int batchSize);
 
     List<OutboxEventJpaEntity> findByAggregateTypeAndAggregateId(String aggregateType, UUID aggregateId);
+
+    @org.springframework.data.jpa.repository.Query(
+            "SELECT COUNT(e) FROM OutboxEventJpaEntity e WHERE e.status = 'PENDING' AND e.createdAt < :threshold")
+    long countStalePending(@org.springframework.data.repository.query.Param("threshold") java.time.Instant threshold);
 }

@@ -3,7 +3,7 @@ package com.company.salonbooking.scheduling.application.usecase;
 import com.company.salonbooking.business.domain.exception.BusinessNotFoundException;
 import com.company.salonbooking.business.domain.repository.BusinessRepository;
 import com.company.salonbooking.scheduling.domain.model.Appointment;
-import com.company.salonbooking.scheduling.domain.repository.AppointmentFilter;
+import com.company.salonbooking.scheduling.domain.model.AppointmentFilter;
 import com.company.salonbooking.scheduling.domain.repository.AppointmentRepository;
 import com.company.salonbooking.shared.exception.UnauthorizedResourceException;
 import org.springframework.stereotype.Service;

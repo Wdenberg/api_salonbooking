@@ -6,7 +6,7 @@ import com.company.salonbooking.scheduling.application.command.*;
 import com.company.salonbooking.scheduling.application.usecase.*;
 import com.company.salonbooking.scheduling.domain.model.Appointment;
 import com.company.salonbooking.scheduling.domain.model.AppointmentStatus;
-import com.company.salonbooking.scheduling.domain.repository.AppointmentFilter;
+import com.company.salonbooking.scheduling.domain.model.AppointmentFilter;
 import com.company.salonbooking.scheduling.interfaces.rest.dto.AppointmentResponse;
 import com.company.salonbooking.scheduling.interfaces.rest.dto.CreateAppointmentRequest;
 import io.swagger.v3.oas.annotations.Parameter;

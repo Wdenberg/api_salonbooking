@@ -2,7 +2,7 @@ package com.company.salonbooking.scheduling.infrastructure.persistence;
 
 import com.company.salonbooking.scheduling.domain.exception.AppointmentConflictException;
 import com.company.salonbooking.scheduling.domain.model.Appointment;
-import com.company.salonbooking.scheduling.domain.repository.AppointmentFilter;
+import com.company.salonbooking.scheduling.domain.model.AppointmentFilter;
 import com.company.salonbooking.scheduling.domain.repository.AppointmentRepository;
 import com.company.salonbooking.shared.domain.model.Money;
 import org.springframework.dao.DataIntegrityViolationException;

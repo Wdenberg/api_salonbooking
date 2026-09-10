@@ -1,11 +1,9 @@
-package com.company.salonbooking.scheduling.domain.repository;
-
-import com.company.salonbooking.scheduling.domain.model.AppointmentStatus;
+package com.company.salonbooking.scheduling.domain.model;
 
 import java.time.Instant;
 import java.util.UUID;
 
-/** Optional filter fields, all nullable (Seção 45). */
+/** Optional filter fields, all nullable. */
 public record AppointmentFilter(
         AppointmentStatus status,
         UUID employeeId,

@@ -1,5 +1,6 @@
 package com.company.salonbooking.infrastructure.metrics;
 
+import com.company.salonbooking.shared.application.port.ApplicationMetrics;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
 import org.springframework.stereotype.Component;
@@ -11,7 +12,7 @@ import org.springframework.stereotype.Component;
  * mode that this avoids.
  */
 @Component
-public class AppMetrics {
+public class AppMetrics implements ApplicationMetrics {
 
     private final Counter appointmentsCreated;
     private final Counter appointmentsCancelled;
@@ -44,15 +45,24 @@ public class AppMetrics {
                 .description("Number of report jobs that failed to generate").register(registry);
     }
 
+    @Override
     public void incrementAppointmentCreated() { appointmentsCreated.increment(); }
+    @Override
     public void incrementAppointmentCancelled() { appointmentsCancelled.increment(); }
+    @Override
     public void incrementAppointmentCompleted() { appointmentsCompleted.increment(); }
+    @Override
     public void incrementAppointmentConflict() { appointmentsConflicts.increment(); }
+    @Override
     public void incrementRabbitMessageFailed(String consumer) {
         rabbitMessagesFailed.increment();
     }
+    @Override
     public void incrementNotificationSent() { notificationsSent.increment(); }
+    @Override
     public void incrementNotificationFailed() { notificationsFailed.increment(); }
+    @Override
     public void incrementReportJobCompleted() { reportJobsCompleted.increment(); }
+    @Override
     public void incrementReportJobFailed() { reportJobsFailed.increment(); }
 }

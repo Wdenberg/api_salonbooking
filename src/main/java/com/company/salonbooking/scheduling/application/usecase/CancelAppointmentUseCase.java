@@ -4,6 +4,7 @@ import com.company.salonbooking.audit.domain.model.AuditAction;
 import com.company.salonbooking.business.domain.repository.BusinessRepository;
 import com.company.salonbooking.business.domain.repository.BusinessSettingsRepository;
 import com.company.salonbooking.employee.domain.repository.EmployeeRepository;
+import com.company.salonbooking.infrastructure.metrics.AppMetrics;
 import com.company.salonbooking.scheduling.application.command.CancelAppointmentCommand;
 import com.company.salonbooking.scheduling.domain.event.AppointmentCancelledEvent;
 import com.company.salonbooking.scheduling.domain.exception.AppointmentNotFoundException;
@@ -28,17 +29,19 @@ public class CancelAppointmentUseCase {
     private final EmployeeRepository employeeRepository;
     private final DomainEventPublisher domainEventPublisher;
     private final AuditRecorder auditRecorder;
+    private final AppMetrics appMetrics;
     private final Clock clock;
 
     public CancelAppointmentUseCase(AppointmentRepository appointmentRepository, BusinessRepository businessRepository,
                                     BusinessSettingsRepository businessSettingsRepository, EmployeeRepository employeeRepository,
-                                    DomainEventPublisher domainEventPublisher, AuditRecorder auditRecorder, Clock clock) {
+                                    DomainEventPublisher domainEventPublisher, AuditRecorder auditRecorder, AppMetrics appMetrics, Clock clock) {
         this.appointmentRepository = appointmentRepository;
         this.businessRepository = businessRepository;
         this.businessSettingsRepository = businessSettingsRepository;
         this.employeeRepository = employeeRepository;
         this.domainEventPublisher = domainEventPublisher;
         this.auditRecorder = auditRecorder;
+        this.appMetrics = appMetrics;
         this.clock = clock;
     }
 
@@ -54,6 +57,7 @@ public class CancelAppointmentUseCase {
 
         appointment.cancel(Instant.now(clock), settings.getCancellationMinimumMinutes());
         Appointment saved = appointmentRepository.save(appointment);
+        appMetrics.incrementAppointmentCancelled();
 
         domainEventPublisher.publish(new AppointmentCancelledEvent(
                 saved.getId(), saved.getBusinessId(), saved.getCustomerId(), saved.getEmployeeId(), saved.getStartAt()));

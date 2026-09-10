@@ -33,6 +33,18 @@ management:
     web:
       exposure:
         include: health,info,metrics,prometheus
+  metrics:
+    distribution:
+      percentiles-histogram:
+        http.server.request: true
+      percentiles:
+        http.server.requests: 0.5, 0.95, 0.99
+      tags:
+        application: ${spring.application.name}
+  prometheus:
+    metrics:
+      export:
+        enabled: true
   endpoint:
     health:
       show-details: when-authorized
@@ -71,3 +83,9 @@ app:
     h24-offset-minutes: 1440   # 24 hours
     h2-offset-minutes: 120     # 2 hours
     poll-interval-millis: 300000  # 5 minutes
+logging:
+  structured:
+    format:
+      console: ecs   # Elastic Common Schema: timestamp, level, message, mdc (correlationId, userId...) em JSON
+  pattern:
+    correlation: "[correlationId=%X{correlationId}] [businessId=%X{businessId}]"

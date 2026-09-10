@@ -17,6 +17,7 @@ import com.company.salonbooking.employee.domain.model.EmployeeScheduleInterval;
 import com.company.salonbooking.employee.domain.repository.AvailabilityBlockRepository;
 import com.company.salonbooking.employee.domain.repository.EmployeeRepository;
 import com.company.salonbooking.employee.domain.repository.EmployeeScheduleRepository;
+import com.company.salonbooking.infrastructure.metrics.AppMetrics;
 import com.company.salonbooking.scheduling.application.command.CreateAppointmentCommand;
 import com.company.salonbooking.scheduling.application.port.EmployeeNameResolver;
 import com.company.salonbooking.scheduling.domain.event.AppointmentCreatedEvent;
@@ -64,13 +65,14 @@ public class CreateAppointmentUseCase {
     private final EmployeeNameResolver employeeNameResolver;
     private final DomainEventPublisher domainEventPublisher;
     private final AuditRecorder auditRecorder;
+    private final AppMetrics appMetrics;
     private final Clock clock;
 
     public CreateAppointmentUseCase(BusinessRepository businessRepository, BusinessSettingsRepository businessSettingsRepository,
                                     BusinessOpeningHourRepository openingHourRepository, ServiceOfferingRepository serviceRepository,
                                     EmployeeRepository employeeRepository, EmployeeScheduleRepository employeeScheduleRepository,
                                     AvailabilityBlockRepository availabilityBlockRepository, AppointmentRepository appointmentRepository,
-                                    EmployeeNameResolver employeeNameResolver, DomainEventPublisher domainEventPublisher, AuditRecorder auditRecorder, Clock clock) {
+                                    EmployeeNameResolver employeeNameResolver, DomainEventPublisher domainEventPublisher, AuditRecorder auditRecorder, AppMetrics appMetrics, Clock clock) {
         this.businessRepository = businessRepository;
         this.businessSettingsRepository = businessSettingsRepository;
         this.openingHourRepository = openingHourRepository;
@@ -82,6 +84,7 @@ public class CreateAppointmentUseCase {
         this.employeeNameResolver = employeeNameResolver;
         this.domainEventPublisher = domainEventPublisher;
         this.auditRecorder = auditRecorder;
+        this.appMetrics = appMetrics;
         this.clock = clock;
     }
 
@@ -111,6 +114,7 @@ public class CreateAppointmentUseCase {
             throw new SchedulingRuleViolationException("Service is not active.");
         }
 
+
         BusinessSettings settings = businessSettingsRepository.findByBusinessId(business.getId())
                 .orElseThrow(() -> new BusinessNotFoundException(business.getId()));
 
@@ -124,6 +128,7 @@ public class CreateAppointmentUseCase {
         validateNoBlockConflict(employee.getId(), startAt, endAt);
 
         if (appointmentRepository.existsOverlapping(employee.getId(), startAt, endAt)) {
+            appMetrics.incrementAppointmentConflict();
             throw new AppointmentConflictException();
         }
 
@@ -133,7 +138,14 @@ public class CreateAppointmentUseCase {
                 employee.getId(), service.getId(), startAt, endAt, command.notes(),
                 service.getName(), service.getPrice(), service.getDuration().toMinutes(), employeeName, now);
 
-        Appointment saved = appointmentRepository.save(appointment);
+        Appointment saved;
+        try {
+            saved = appointmentRepository.save(appointment);
+        }catch (AppointmentConflictException e){
+            appMetrics.incrementAppointmentConflict();
+            throw e;
+        }
+        appMetrics.incrementAppointmentCreated();
 
         // Same transaction as the insert above (Seção 25/26): if the commit fails for any
         // reason, the outbox row never persists either — appointment and event are atomic.

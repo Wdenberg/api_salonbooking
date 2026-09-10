@@ -61,6 +61,21 @@ services:
     networks:
       - salonbooking-net
 
+  prometheus:
+    image: prom/prometheus:v2.55.0
+    container_name: salonbooking-prometheus
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - salonbooking-net
+    profiles:
+      - observability
+
 volumes:
   postgres_data:
 

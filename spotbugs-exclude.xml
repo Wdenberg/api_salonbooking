@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<FindBugsFilter>
+    <!-- JPA entities need a no-arg protected constructor; SpotBugs flags unused fields
+         set only via reflection by Hibernate — a known false positive for this pattern. -->
+    <Match>
+        <Class name="~.*JpaEntity" />
+        <Bug pattern="URF_UNREAD_FIELD" />
+    </Match>
+    <!-- Records used purely as DTOs sometimes trigger EI_EXPOSE_REP on collection
+         fields even when the record constructor already defensively copies (Money,
+         TimeRange, etc. do this explicitly where it matters). -->
+    <Match>
+        <Class name="~.*Dto" />
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2" />
+    </Match>
+</FindBugsFilter>

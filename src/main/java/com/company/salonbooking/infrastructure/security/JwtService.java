@@ -34,14 +34,20 @@ public class JwtService implements TokenIssuer {
     private final BusinessContextResolver businessContextResolver;
 
     public JwtService(JwtProperties properties, Clock clock, BusinessContextResolver businessContextResolver) {
-        if (properties.secret() == null || properties.secret().getBytes(StandardCharsets.UTF_8).length < MIN_SECRET_BYTES) {
-            throw new IllegalStateException(
-                    "app.jwt.secret must be configured with at least 32 bytes. Set the JWT_SECRET environment variable.");
-        }
-        this.key = Keys.hmacShaKeyFor(properties.secret().getBytes(StandardCharsets.UTF_8));
+        this.key = createKey(properties);
         this.expirationSeconds = properties.expirationSeconds();
         this.clock = clock;
         this.businessContextResolver = businessContextResolver;
+    }
+
+    private static SecretKey createKey(JwtProperties properties) {
+        String secret = properties.secret();
+        if (secret == null || secret.getBytes(StandardCharsets.UTF_8).length < MIN_SECRET_BYTES) {
+            throw new IllegalStateException(
+                    "app.jwt.secret must be configured with at least 32 bytes. "
+                            + "Set the JWT_SECRET environment variable.");
+        }
+        return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
     }
 
     @Override

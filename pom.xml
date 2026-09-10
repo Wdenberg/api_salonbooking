@@ -368,7 +368,7 @@
 					<excludedGroups>${surefire.excludedGroups}</excludedGroups>
 
 					<!-- Mockito / dynamic agent loading on recent JDKs -->
-					<argLine>-XX:+EnableDynamicAgentLoading</argLine>
+					<argLine>${jacocoArgLine} -XX:+EnableDynamicAgentLoading</argLine>
 
 				</configuration>
 			</plugin>
@@ -402,6 +402,9 @@
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
+						<configuration>
+							<propertyName>jacocoArgLine</propertyName>
+						</configuration>
 					</execution>
 
 					<!-- Generate coverage report -->
@@ -432,7 +435,7 @@
 											com.company.salonbooking.scheduling.domain.*
 										</include>
 										<include>
-											com.company.salonbooking.scheduling.application.*
+											com.company.salonbooking.scheduling.application.usecase.*
 										</include>
 									</includes>
 

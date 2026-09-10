@@ -11,4 +11,8 @@ public record ErrorResponse(
         String path,
         String traceId,
         List<String> errors
-) {}
+) {
+    public ErrorResponse {
+        errors = errors == null ? List.of() : List.copyOf(errors);
+    }
+}

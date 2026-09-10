@@ -61,7 +61,7 @@ public class UserJpaEntity {
         this.email = email;
         this.passwordHash = passwordHash;
         this.status = status;
-        this.roles = roles;
+        this.roles = roles == null ? new HashSet<>() : new HashSet<>(roles);
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -71,7 +71,7 @@ public class UserJpaEntity {
     public String getEmail() { return email; }
     public String getPasswordHash() { return passwordHash; }
     public UserStatus getStatus() { return status; }
-    public Set<Role> getRoles() { return roles; }
+    public Set<Role> getRoles() { return roles == null ? Set.of() : Set.copyOf(roles); }
     public Instant getCreatedAt() { return createdAt; }
     public Instant getUpdatedAt() { return updatedAt; }
 }

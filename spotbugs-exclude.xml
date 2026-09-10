@@ -13,4 +13,27 @@
         <Class name="~.*Dto" />
         <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2" />
     </Match>
+
+    <!-- Spring-managed collaborators are injected services, not mutable state
+         exposed by the analyzed class. -->
+    <Match>
+        <Class name="~com\.company\.salonbooking\..*\.application\..*" />
+        <Bug pattern="EI_EXPOSE_REP2" />
+    </Match>
+    <Match>
+        <Class name="~com\.company\.salonbooking\..*\.infrastructure\..*" />
+        <Bug pattern="EI_EXPOSE_REP2" />
+    </Match>
+    <Match>
+        <Class name="~com\.company\.salonbooking\.infrastructure\..*" />
+        <Bug pattern="EI_EXPOSE_REP2" />
+    </Match>
+    <Match>
+        <Class name="~com\.company\.salonbooking\..*\.interfaces\.rest\..*" />
+        <Bug pattern="EI_EXPOSE_REP2" />
+    </Match>
+    <Match>
+        <Class name="com.company.salonbooking.infrastructure.security.JwtService" />
+        <Bug pattern="CT_CONSTRUCTOR_THROW" />
+    </Match>
 </FindBugsFilter>

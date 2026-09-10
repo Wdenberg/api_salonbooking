@@ -4,7 +4,7 @@ import com.company.salonbooking.reporting.application.port.ReportGenerator;
 import com.company.salonbooking.reporting.domain.model.ReportJob;
 import com.company.salonbooking.reporting.domain.model.ReportType;
 import com.company.salonbooking.scheduling.domain.model.Appointment;
-import com.company.salonbooking.scheduling.domain.repository.AppointmentFilter;
+import com.company.salonbooking.scheduling.domain.model.AppointmentFilter;
 import com.company.salonbooking.scheduling.domain.repository.AppointmentRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Component;

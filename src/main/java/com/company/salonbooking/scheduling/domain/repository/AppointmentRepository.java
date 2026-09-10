@@ -2,6 +2,7 @@ package com.company.salonbooking.scheduling.domain.repository;
 
 import com.company.salonbooking.scheduling.domain.model.Appointment;
 
+import com.company.salonbooking.scheduling.domain.model.AppointmentFilter;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;

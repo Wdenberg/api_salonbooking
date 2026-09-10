@@ -4,13 +4,13 @@ import com.company.salonbooking.audit.domain.model.AuditAction;
 import com.company.salonbooking.business.domain.repository.BusinessRepository;
 import com.company.salonbooking.business.domain.repository.BusinessSettingsRepository;
 import com.company.salonbooking.employee.domain.repository.EmployeeRepository;
-import com.company.salonbooking.infrastructure.metrics.AppMetrics;
 import com.company.salonbooking.scheduling.application.command.CancelAppointmentCommand;
 import com.company.salonbooking.scheduling.domain.event.AppointmentCancelledEvent;
 import com.company.salonbooking.scheduling.domain.exception.AppointmentNotFoundException;
 import com.company.salonbooking.scheduling.domain.model.Appointment;
 import com.company.salonbooking.scheduling.domain.repository.AppointmentRepository;
 import com.company.salonbooking.shared.application.port.AuditRecorder;
+import com.company.salonbooking.shared.application.port.ApplicationMetrics;
 import com.company.salonbooking.shared.application.port.DomainEventPublisher;
 import com.company.salonbooking.shared.exception.UnauthorizedResourceException;
 import org.springframework.stereotype.Service;
@@ -29,12 +29,12 @@ public class CancelAppointmentUseCase {
     private final EmployeeRepository employeeRepository;
     private final DomainEventPublisher domainEventPublisher;
     private final AuditRecorder auditRecorder;
-    private final AppMetrics appMetrics;
+    private final ApplicationMetrics appMetrics;
     private final Clock clock;
 
     public CancelAppointmentUseCase(AppointmentRepository appointmentRepository, BusinessRepository businessRepository,
                                     BusinessSettingsRepository businessSettingsRepository, EmployeeRepository employeeRepository,
-                                    DomainEventPublisher domainEventPublisher, AuditRecorder auditRecorder, AppMetrics appMetrics, Clock clock) {
+                                    DomainEventPublisher domainEventPublisher, AuditRecorder auditRecorder, ApplicationMetrics appMetrics, Clock clock) {
         this.appointmentRepository = appointmentRepository;
         this.businessRepository = businessRepository;
         this.businessSettingsRepository = businessSettingsRepository;

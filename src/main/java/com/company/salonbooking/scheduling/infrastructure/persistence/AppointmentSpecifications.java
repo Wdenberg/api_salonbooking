@@ -1,6 +1,6 @@
 package com.company.salonbooking.scheduling.infrastructure.persistence;
 
-import com.company.salonbooking.scheduling.domain.repository.AppointmentFilter;
+import com.company.salonbooking.scheduling.domain.model.AppointmentFilter;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;

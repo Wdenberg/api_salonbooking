@@ -1,8 +1,8 @@
 package com.company.salonbooking.reporting.application.usecase;
 
-import com.company.salonbooking.infrastructure.metrics.AppMetrics;
 import com.company.salonbooking.reporting.application.port.ReportGenerator;
 import com.company.salonbooking.reporting.domain.exception.ReportJobNotFoundException;
+import com.company.salonbooking.shared.application.port.ApplicationMetrics;
 import com.company.salonbooking.reporting.domain.model.ReportJob;
 import com.company.salonbooking.reporting.domain.repository.ReportJobRepository;
 import org.springframework.stereotype.Service;
@@ -25,9 +25,9 @@ public class ProcessReportUseCase {
     private final ReportJobRepository reportJobRepository;
     private final Map<com.company.salonbooking.reporting.domain.model.ReportType, ReportGenerator> generatorsByType;
     private final Clock clock;
-    private final AppMetrics appMetrics;
+    private final ApplicationMetrics appMetrics;
 
-    public ProcessReportUseCase(ReportJobRepository reportJobRepository, List<ReportGenerator> generators, Clock clock, AppMetrics appMetrics) {
+    public ProcessReportUseCase(ReportJobRepository reportJobRepository, List<ReportGenerator> generators, Clock clock, ApplicationMetrics appMetrics) {
         this.reportJobRepository = reportJobRepository;
         this.generatorsByType = generators.stream()
                 .collect(java.util.stream.Collectors.toMap(ReportGenerator::supports, g -> g));

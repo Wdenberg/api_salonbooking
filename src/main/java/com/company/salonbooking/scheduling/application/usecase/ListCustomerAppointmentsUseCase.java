@@ -1,7 +1,7 @@
 package com.company.salonbooking.scheduling.application.usecase;
 
 import com.company.salonbooking.scheduling.domain.model.Appointment;
-import com.company.salonbooking.scheduling.domain.repository.AppointmentFilter;
+import com.company.salonbooking.scheduling.domain.model.AppointmentFilter;
 import com.company.salonbooking.scheduling.domain.repository.AppointmentRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

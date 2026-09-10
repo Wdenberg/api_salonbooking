@@ -17,7 +17,6 @@ import com.company.salonbooking.employee.domain.model.EmployeeScheduleInterval;
 import com.company.salonbooking.employee.domain.repository.AvailabilityBlockRepository;
 import com.company.salonbooking.employee.domain.repository.EmployeeRepository;
 import com.company.salonbooking.employee.domain.repository.EmployeeScheduleRepository;
-import com.company.salonbooking.infrastructure.metrics.AppMetrics;
 import com.company.salonbooking.scheduling.application.command.CreateAppointmentCommand;
 import com.company.salonbooking.scheduling.application.port.EmployeeNameResolver;
 import com.company.salonbooking.scheduling.domain.event.AppointmentCreatedEvent;
@@ -26,6 +25,7 @@ import com.company.salonbooking.scheduling.domain.exception.SchedulingRuleViolat
 import com.company.salonbooking.scheduling.domain.model.Appointment;
 import com.company.salonbooking.scheduling.domain.repository.AppointmentRepository;
 import com.company.salonbooking.shared.application.port.AuditRecorder;
+import com.company.salonbooking.shared.application.port.ApplicationMetrics;
 import com.company.salonbooking.shared.application.port.DomainEventPublisher;
 import com.company.salonbooking.shared.domain.model.TimeRange;
 import org.springframework.stereotype.Service;
@@ -65,14 +65,14 @@ public class CreateAppointmentUseCase {
     private final EmployeeNameResolver employeeNameResolver;
     private final DomainEventPublisher domainEventPublisher;
     private final AuditRecorder auditRecorder;
-    private final AppMetrics appMetrics;
+    private final ApplicationMetrics appMetrics;
     private final Clock clock;
 
     public CreateAppointmentUseCase(BusinessRepository businessRepository, BusinessSettingsRepository businessSettingsRepository,
                                     BusinessOpeningHourRepository openingHourRepository, ServiceOfferingRepository serviceRepository,
                                     EmployeeRepository employeeRepository, EmployeeScheduleRepository employeeScheduleRepository,
                                     AvailabilityBlockRepository availabilityBlockRepository, AppointmentRepository appointmentRepository,
-                                    EmployeeNameResolver employeeNameResolver, DomainEventPublisher domainEventPublisher, AuditRecorder auditRecorder, AppMetrics appMetrics, Clock clock) {
+                                    EmployeeNameResolver employeeNameResolver, DomainEventPublisher domainEventPublisher, AuditRecorder auditRecorder, ApplicationMetrics appMetrics, Clock clock) {
         this.businessRepository = businessRepository;
         this.businessSettingsRepository = businessSettingsRepository;
         this.openingHourRepository = openingHourRepository;

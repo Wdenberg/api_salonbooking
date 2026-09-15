@@ -11,10 +11,10 @@ import com.company.salonbooking.identity.domain.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
-
 import java.time.Clock;
 import java.time.Instant;
 import java.util.UUID;
+
 
 @Service
 public class RegisterOwnerUseCase {
@@ -43,7 +43,7 @@ public class RegisterOwnerUseCase {
         User saved = userRepository.save(user);
 
         TokenIssuer.IssuedToken token = tokenIssuer.issueToken(saved);
-        return new AuthResult(saved.getId(), token.accessToken(), token.expiresInSeconds());
+        return new AuthResult(saved.getId(), token.accessToken(), token.refreshToken(), token.accessTokenExpiresInSeconds(), token.refreshTokenExpiresInSeconds());
 
     }
 }

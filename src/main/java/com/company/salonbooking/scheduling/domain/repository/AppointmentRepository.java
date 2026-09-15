@@ -31,4 +31,9 @@ public interface AppointmentRepository {
 
     List<Appointment> findConfirmedStartingBetween(Instant from, Instant to);
 
+    long countActiveByBusinessId(UUID businessId);
+
+    long countActiveByEmployeeId(UUID employeeId);
+
+    long countActiveByServiceId(UUID serviceId);
 }

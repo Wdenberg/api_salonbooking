@@ -2,6 +2,7 @@ package com.company.salonbooking.employee.interfaces.rest;
 
 import com.company.salonbooking.employee.application.command.ChangeEmployeeStatusCommand;
 import com.company.salonbooking.employee.application.command.CreateEmployeeCommand;
+import com.company.salonbooking.employee.application.command.DeleteEmployeeCommand;
 import com.company.salonbooking.employee.application.command.UpdateEmployeeCommand;
 import com.company.salonbooking.employee.application.usecase.*;
 import com.company.salonbooking.employee.domain.model.Employee;
@@ -27,15 +28,18 @@ public class EmployeeController {
     private final ListEmployeesUseCase listEmployeesUseCase;
     private final UpdateEmployeeUseCase updateEmployeeUseCase;
     private final ChangeEmployeeStatusUseCase changeEmployeeStatusUseCase;
+    private final DeleteEmployeeUseCase deleteEmployeeUseCase;
 
     public EmployeeController(CreateEmployeeUseCase createEmployeeUseCase, GetEmployeeUseCase getEmployeeUseCase,
                               ListEmployeesUseCase listEmployeesUseCase, UpdateEmployeeUseCase updateEmployeeUseCase,
-                              ChangeEmployeeStatusUseCase changeEmployeeStatusUseCase) {
+                              ChangeEmployeeStatusUseCase changeEmployeeStatusUseCase,
+                              DeleteEmployeeUseCase deleteEmployeeUseCase) {
         this.createEmployeeUseCase = createEmployeeUseCase;
         this.getEmployeeUseCase = getEmployeeUseCase;
         this.listEmployeesUseCase = listEmployeesUseCase;
         this.updateEmployeeUseCase = updateEmployeeUseCase;
         this.changeEmployeeStatusUseCase = changeEmployeeStatusUseCase;
+        this.deleteEmployeeUseCase = deleteEmployeeUseCase;
     }
 
     @PostMapping("/api/v1/businesses/{businessId}/employees")
@@ -81,5 +85,13 @@ public class EmployeeController {
         Employee employee = changeEmployeeStatusUseCase.execute(
                 new ChangeEmployeeStatusCommand(employeeId, principal.userId(), request.status()));
         return ResponseEntity.ok(EmployeeResponse.from(employee));
+    }
+
+    @DeleteMapping("/api/v1/employees/{employeeId}")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<Void> delete(@PathVariable UUID employeeId,
+                                       @AuthenticationPrincipal AuthenticatedUser principal) {
+        deleteEmployeeUseCase.execute(new DeleteEmployeeCommand(employeeId, principal.userId()));
+        return ResponseEntity.noContent().build();
     }
 }

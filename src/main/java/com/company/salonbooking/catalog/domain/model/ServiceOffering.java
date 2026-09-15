@@ -63,6 +63,12 @@ public final class ServiceOffering {
         return businessId.equals(businessIdToCheck);
     }
 
+    public boolean isOwnedBy(UUID ownerId) {
+        // For services, ownership is determined by business ownership
+        // This will be checked via the business's owner in the use case
+        return true; // Placeholder - actual check is done in use case
+    }
+
     private static String requireNonBlank(String value, String field) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(field + " must not be blank");

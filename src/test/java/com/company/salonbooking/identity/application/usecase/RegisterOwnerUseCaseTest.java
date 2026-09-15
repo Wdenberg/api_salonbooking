@@ -52,12 +52,14 @@ class RegisterOwnerUseCaseTest {
         when(userRepository.existsByEmail(any())).thenReturn(false);
         when(passwordHasher.hash("password123")).thenReturn("hashed");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        when(tokenIssuer.issueToken(any(User.class))).thenReturn(new TokenIssuer.IssuedToken("jwt-token", 3600L));
+        when(tokenIssuer.issueToken(any(User.class))).thenReturn(new TokenIssuer.IssuedToken("jwt-token", "refresh-token", 3600L, 2592000L));
 
         RegisterOwnerCommand command = new RegisterOwnerCommand("Owner", "owner@example.com", "password123");
         AuthResult result = useCase.execute(command);
 
         assertThat(result.accessToken()).isEqualTo("jwt-token");
-        assertThat(result.expiresInSeconds()).isEqualTo(3600L);
+        assertThat(result.refreshToken()).isEqualTo("refresh-token");
+        assertThat(result.accessTokenExpiresInSeconds()).isEqualTo(3600L);
+        assertThat(result.refreshTokenExpiresInSeconds()).isEqualTo(2592000L);
     }
 }

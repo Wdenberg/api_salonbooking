@@ -49,4 +49,9 @@ public class ServiceOfferingRepositoryAdapter implements ServiceOfferingReposito
                 ServiceDuration.ofMinutes(entity.getDurationMinutes()), entity.isActive(),
                 entity.getCreatedAt(), entity.getUpdatedAt());
     }
+
+    @Override
+    public void deleteById(UUID id) {
+        jpaRepository.deleteById(id);
+    }
 }

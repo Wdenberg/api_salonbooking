@@ -84,4 +84,19 @@ public class AppointmentRepositoryAdapter implements AppointmentRepository {
     public List<Appointment> findConfirmedStartingBetween(Instant from, Instant to) {
         return jpaRepository.findConfirmedStartingBetween(from, to).stream().map(this::toDomain).toList();
     }
+
+    @Override
+    public long countActiveByBusinessId(UUID businessId) {
+        return jpaRepository.countActiveByBusinessId(businessId);
+    }
+
+    @Override
+    public long countActiveByEmployeeId(UUID employeeId) {
+        return jpaRepository.countActiveByEmployeeId(employeeId);
+    }
+
+    @Override
+    public long countActiveByServiceId(UUID serviceId) {
+        return jpaRepository.countActiveByServiceId(serviceId);
+    }
 }

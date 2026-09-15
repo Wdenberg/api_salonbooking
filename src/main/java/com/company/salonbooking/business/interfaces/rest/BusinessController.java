@@ -2,9 +2,11 @@ package com.company.salonbooking.business.interfaces.rest;
 
 import com.company.salonbooking.business.application.command.ChangeBusinessStatusCommand;
 import com.company.salonbooking.business.application.command.CreateBusinessCommand;
+import com.company.salonbooking.business.application.command.DeleteBusinessCommand;
 import com.company.salonbooking.business.application.command.UpdateBusinessCommand;
 import com.company.salonbooking.business.application.usecase.ChangeBusinessStatusUseCase;
 import com.company.salonbooking.business.application.usecase.CreateBusinessUseCase;
+import com.company.salonbooking.business.application.usecase.DeleteBusinessUseCase;
 import com.company.salonbooking.business.application.usecase.GetBusinessUseCase;
 import com.company.salonbooking.business.application.usecase.UpdateBusinessUseCase;
 import com.company.salonbooking.business.domain.model.Address;
@@ -33,14 +35,17 @@ public class BusinessController {
     private final GetBusinessUseCase getBusinessUseCase;
     private final UpdateBusinessUseCase updateBusinessUseCase;
     private final ChangeBusinessStatusUseCase changeBusinessStatusUseCase;
+    private final DeleteBusinessUseCase deleteBusinessUseCase;
 
     public BusinessController(CreateBusinessUseCase createBusinessUseCase, GetBusinessUseCase getBusinessUseCase,
                               UpdateBusinessUseCase updateBusinessUseCase,
-                              ChangeBusinessStatusUseCase changeBusinessStatusUseCase) {
+                              ChangeBusinessStatusUseCase changeBusinessStatusUseCase,
+                              DeleteBusinessUseCase deleteBusinessUseCase) {
         this.createBusinessUseCase = createBusinessUseCase;
         this.getBusinessUseCase = getBusinessUseCase;
         this.updateBusinessUseCase = updateBusinessUseCase;
         this.changeBusinessStatusUseCase = changeBusinessStatusUseCase;
+        this.deleteBusinessUseCase = deleteBusinessUseCase;
     }
 
     @PostMapping
@@ -86,5 +91,13 @@ public class BusinessController {
                 new ChangeBusinessStatusCommand(id, principal.userId(), request.status()));
 
         return ResponseEntity.ok(BusinessResponse.from(business));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<Void> delete(@PathVariable UUID id,
+                                       @AuthenticationPrincipal AuthenticatedUser principal) {
+        deleteBusinessUseCase.execute(new DeleteBusinessCommand(id, principal.userId()));
+        return ResponseEntity.noContent().build();
     }
 }

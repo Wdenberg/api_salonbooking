@@ -48,6 +48,6 @@ public class RegisterCustomerUseCase {
         customerProfileInitializer.initializeFor(saved.getId());
 
         TokenIssuer.IssuedToken token = tokenIssuer.issueToken(saved);
-        return new AuthResult(saved.getId(), token.accessToken(), token.expiresInSeconds());
+        return new AuthResult(saved.getId(), token.accessToken(), token.refreshToken(), token.accessTokenExpiresInSeconds(), token.refreshTokenExpiresInSeconds());
     }
 }

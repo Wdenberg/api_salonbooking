@@ -1,5 +1,6 @@
 package com.company.salonbooking.infrastructure.security;
 
+import com.company.salonbooking.identity.application.port.AccessTokenBlocklist;
 import com.company.salonbooking.identity.domain.model.Role;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,15 +21,18 @@ import java.util.stream.Collectors;
 /**
  * Stateless JWT authentication. Reconstructs the AuthenticatedUser principal
  * directly from token claims, without a database round-trip on every request.
+ * Checks access token blocklist for revoked tokens (logout).
  */
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtService jwtService;
+    private final AccessTokenBlocklist accessTokenBlocklist;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService, AccessTokenBlocklist accessTokenBlocklist) {
         this.jwtService = jwtService;
+        this.accessTokenBlocklist = accessTokenBlocklist;
     }
 
     @Override
@@ -39,6 +43,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         if (header != null && header.startsWith(BEARER_PREFIX)) {
             String token = header.substring(BEARER_PREFIX.length());
+
+            // Check blocklist first (logout/revocation)
+            if (accessTokenBlocklist.isBlocked(token)) {
+                // Token is revoked, don't authenticate
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             Optional<AuthenticatedUser> principal = jwtService.parse(token);
 
             if (principal.isPresent() && SecurityContextHolder.getContext().getAuthentication() == null) {

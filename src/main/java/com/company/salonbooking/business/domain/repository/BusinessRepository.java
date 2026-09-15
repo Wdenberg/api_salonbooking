@@ -10,4 +10,6 @@ public interface BusinessRepository {
     Optional<Business> findById(UUID id);
 
     Business save(Business business);
+    Optional<Business> findByOwnerId(UUID ownerId);
+    void deleteById(UUID id);
 }

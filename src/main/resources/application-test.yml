@@ -31,3 +31,8 @@ app:
     # Large enough that the scheduler never fires spontaneously mid-test;
     # tests trigger ReminderSchedulerJob.dispatchDueReminders() directly.
     poll-interval-millis: 3600000
+  rate-limit:
+    enabled: false
+    default-limit:
+      requests-per-minute: 10000
+      requests-per-second: 1000

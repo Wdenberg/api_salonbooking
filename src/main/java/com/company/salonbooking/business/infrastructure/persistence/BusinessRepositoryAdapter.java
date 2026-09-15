@@ -25,4 +25,14 @@ public class BusinessRepositoryAdapter implements BusinessRepository {
     public Business save(Business business) {
         return BusinessMapper.toDomain(jpaRepository.save(BusinessMapper.toEntity(business)));
     }
+
+    @Override
+    public Optional<Business> findByOwnerId(UUID ownerId) {
+        return jpaRepository.findByOwnerId(ownerId).map(BusinessMapper::toDomain);
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+        jpaRepository.deleteById(id);
+    }
 }

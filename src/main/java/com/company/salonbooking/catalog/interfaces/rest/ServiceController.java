@@ -2,6 +2,7 @@ package com.company.salonbooking.catalog.interfaces.rest;
 
 import com.company.salonbooking.catalog.application.command.ChangeServiceStatusCommand;
 import com.company.salonbooking.catalog.application.command.CreateServiceCommand;
+import com.company.salonbooking.catalog.application.command.DeleteServiceCommand;
 import com.company.salonbooking.catalog.application.command.UpdateServiceCommand;
 import com.company.salonbooking.catalog.application.usecase.*;
 import com.company.salonbooking.catalog.domain.model.ServiceOffering;
@@ -27,15 +28,18 @@ public class ServiceController {
     private final ListServicesUseCase listServicesUseCase;
     private final UpdateServiceUseCase updateServiceUseCase;
     private final ChangeServiceStatusUseCase changeServiceStatusUseCase;
+    private final DeleteServiceUseCase deleteServiceUseCase;
 
     public ServiceController(CreateServiceUseCase createServiceUseCase, GetServiceUseCase getServiceUseCase,
                              ListServicesUseCase listServicesUseCase, UpdateServiceUseCase updateServiceUseCase,
-                             ChangeServiceStatusUseCase changeServiceStatusUseCase) {
+                             ChangeServiceStatusUseCase changeServiceStatusUseCase,
+                             DeleteServiceUseCase deleteServiceUseCase) {
         this.createServiceUseCase = createServiceUseCase;
         this.getServiceUseCase = getServiceUseCase;
         this.listServicesUseCase = listServicesUseCase;
         this.updateServiceUseCase = updateServiceUseCase;
         this.changeServiceStatusUseCase = changeServiceStatusUseCase;
+        this.deleteServiceUseCase = deleteServiceUseCase;
     }
 
     @PostMapping("/api/v1/businesses/{businessId}/services")
@@ -86,5 +90,13 @@ public class ServiceController {
                 new ChangeServiceStatusCommand(serviceId, principal.userId(), request.active()));
 
         return ResponseEntity.ok(ServiceResponse.from(service));
+    }
+
+    @DeleteMapping("/api/v1/services/{serviceId}")
+    @PreAuthorize("hasRole('OWNER')")
+    public ResponseEntity<Void> delete(@PathVariable UUID serviceId,
+                                       @AuthenticationPrincipal AuthenticatedUser principal) {
+        deleteServiceUseCase.execute(new DeleteServiceCommand(serviceId, principal.userId()));
+        return ResponseEntity.noContent().build();
     }
 }

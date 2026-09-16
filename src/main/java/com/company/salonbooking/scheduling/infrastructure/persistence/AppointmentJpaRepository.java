@@ -32,4 +32,5 @@ public interface AppointmentJpaRepository extends JpaRepository<AppointmentJpaEn
 
     @Query("SELECT COUNT(a) FROM AppointmentJpaEntity a WHERE a.serviceId = :serviceId AND a.status IN ('PENDING','CONFIRMED')")
     long countActiveByServiceId(@Param("serviceId") UUID serviceId);
+
 }

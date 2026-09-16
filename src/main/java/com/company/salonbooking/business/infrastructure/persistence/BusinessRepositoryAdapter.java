@@ -2,8 +2,10 @@ package com.company.salonbooking.business.infrastructure.persistence;
 
 import com.company.salonbooking.business.domain.model.Business;
 import com.company.salonbooking.business.domain.repository.BusinessRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,5 +36,10 @@ public class BusinessRepositoryAdapter implements BusinessRepository {
     @Override
     public void deleteById(UUID id) {
         jpaRepository.deleteById(id);
+    }
+
+    @Override
+    public List<Business> findAll(int page, int size) {
+        return jpaRepository.findAll(PageRequest.of(page, size)).getContent().stream().map(BusinessMapper::toDomain).toList();
     }
 }

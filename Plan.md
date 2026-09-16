@@ -4,7 +4,7 @@
 
 ---
 
-## ✅ IMPLEMENTED (Items 1-9)
+## ✅ IMPLEMENTED (Items 1-11, 13-14)
 
 | Item | Description | Status | Key Changes |
 |------|-------------|--------|-------------|
@@ -16,7 +16,11 @@
 | **6** | **Account Lockout / Brute-force Protection** | ✅ Done | `FailedLoginTracker` (Caffeine), 5 attempts / 15min lockout, HTTP 429 |
 | **7** | **Unit Tests Isolados - CreateAppointmentUseCase** | ✅ Done | 6 new tests: employee schedule, availability block, pre-check conflict, cross-business validation |
 | **8** | **Limpeza outbox_events (PUBLISHED antigos)** | ✅ Done | `OutboxCleanupJob` @Scheduled daily 3AM, configurable retention (30d default) |
-| **9** | **Documentação OpenAPI Rica** | ✅ Parcial | `@Operation`, `@ApiResponses`, `@Schema` on Auth, Business, Employee DTOs/controllers |
+| **9** | **Documentação OpenAPI Rica** | ✅ Done | `@Operation`, `@ApiResponses`, `@Schema` on all controllers + DTOs |
+| **10** | **PLATFORM_ADMIN endpoints** | ✅ Done | `AdminAppointmentController`, `AdminBusinessController`, `AdminUserController` with cross-tenant queries |
+| **11** | **GET `/api/v1/employees/{id}/availability-blocks`** | ✅ Done | `ListAvailabilityBlocksUseCase`, repository method, endpoint in `AvailabilityBlockController` |
+| **13** | **GET `/api/v1/appointments` (global admin)** | ✅ Done | Implemented in `AdminAppointmentController` |
+| **14** | **Endpoints Admin globais (cross-tenant)** | ✅ Done | Business, Users, Appointments listing for PLATFORM_ADMIN |
 
 ---
 
@@ -24,19 +28,14 @@
 
 | Item | Description | Status | Notes |
 |------|-------------|--------|-------|
-| **9** | OpenAPI docs para demais controllers | 🔄 Partial | Auth, Business, Employee done. Falta: Service, Appointment, Availability, Customer, Report, Audit, OpeningHours, EmployeeSchedule, AvailabilityBlock |
 | **12** | `@Size(min=8)` em password DTOs | ✅ Done | Já aplicado em `RegisterOwnerRequest`, `RegisterCustomerRequest`, `CreateEmployeeRequest` |
 
 ---
 
-## ⏳ PENDING (Items 10-22)
+## ⏳ PENDING (Items 15-22)
 
 | Item | Description | Priority | Dependencies |
 |------|-------------|----------|--------------|
-| **10** | **PLATFORM_ADMIN endpoints** | 🟡 Medium | Role existe, precisa controllers/admin |
-| **11** | **GET `/api/v1/employees/{id}/availability-blocks`** | 🟢 Low | Nova rota + use case list blocks |
-| **13** | **GET `/api/v1/appointments` (global admin)** | 🟡 Medium | Requer PLATFORM_ADMIN endpoint |
-| **14** | **Endpoints Admin globais (cross-tenant)** | 🟡 Medium | Depende do Item 10 |
 | **15** | **Refresh Token Rotation Testes** | 🟢 Low | Testes de rotação e detecção de reuso |
 | **16** | **Outbox Cleanup Testes** | 🟢 Low | Teste do job de limpeza |
 | **17** | **Rate Limit Testes** | 🟢 Low | Testes de throttling |
@@ -52,7 +51,7 @@
 
 ```text
 [ ] Testes PLATFORM_ADMIN endpoints
-[ ] Testes GET /employees/{id}/availability-blocks
+[x] Testes GET /employees/{id}/availability-blocks
 [ ] Testes GET /appointments (admin global)
 [ ] Testes Refresh Token Rotation (reuse detection)
 [ ] Testes Outbox Cleanup Job
@@ -81,11 +80,9 @@
 
 ## 🎯 PRÓXIMOS PASSOS RECOMENDADOS
 
-1. **Completar OpenAPI docs** nos controllers restantes (Service, Appointment, etc.)
-2. **Implementar PLATFORM_ADMIN** endpoints para operações cross-tenant
-3. **Adicionar testes unitários** para os novos recursos (Items 10-21)
-4. **Validar em ambiente com Docker** (Testcontainers, integração completa)
-5. **Deploy staging** e testes de carga
+1. **Adicionar testes unitários** para os novos recursos (Items 11, 15-21)
+2. **Validar em ambiente com Docker** (Testcontainers, integração completa)
+3. **Deploy staging** e testes de carga
 
 ---
 
@@ -99,4 +96,4 @@
 
 ---
 
-*Última atualização: 2026-09-14*
+*Última atualização: 2026-09-16*

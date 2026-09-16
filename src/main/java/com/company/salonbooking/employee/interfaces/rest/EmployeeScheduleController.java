@@ -7,6 +7,12 @@ import com.company.salonbooking.employee.domain.model.EmployeeScheduleInterval;
 import com.company.salonbooking.employee.interfaces.rest.dto.EmployeeScheduleIntervalDto;
 import com.company.salonbooking.infrastructure.security.AuthenticatedUser;
 import com.company.salonbooking.shared.domain.model.TimeRange;
+import com.company.salonbooking.shared.exception.ErrorResponse;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +25,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/employees/{employeeId}/schedule")
-@Tag(name = "Employee Schedule")
+@Tag(name = "Employee Schedule", description = "Employee working schedule management endpoints")
 public class EmployeeScheduleController {
 
     private final GetEmployeeScheduleUseCase getUseCase;
@@ -30,6 +36,13 @@ public class EmployeeScheduleController {
         this.updateUseCase = updateUseCase;
     }
 
+    @Operation(summary = "Get employee schedule", description = "Returns the working schedule intervals for the employee")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Schedule retrieved successfully",
+                content = @Content(schema = @Schema(implementation = EmployeeScheduleIntervalDto.class))),
+        @ApiResponse(responseCode = "404", description = "Employee not found",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @GetMapping
     public ResponseEntity<List<EmployeeScheduleIntervalDto>> get(@PathVariable UUID employeeId) {
         List<EmployeeScheduleIntervalDto> response = getUseCase.execute(employeeId).stream()
@@ -38,11 +51,22 @@ public class EmployeeScheduleController {
         return ResponseEntity.ok(response);
     }
 
+    @Operation(summary = "Update employee schedule", description = "Replaces the employee's working schedule with the provided intervals")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Schedule updated successfully",
+                content = @Content(schema = @Schema(implementation = EmployeeScheduleIntervalDto.class))),
+        @ApiResponse(responseCode = "400", description = "Validation error",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "403", description = "Access denied - not the business owner or employee",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+        @ApiResponse(responseCode = "404", description = "Employee not found",
+                content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     @PutMapping
     @PreAuthorize("hasAnyRole('OWNER','EMPLOYEE')")
     public ResponseEntity<List<EmployeeScheduleIntervalDto>> update(@PathVariable UUID employeeId,
-                                                                    @Valid @RequestBody List<EmployeeScheduleIntervalDto> request,
-                                                                    @AuthenticationPrincipal AuthenticatedUser principal) {
+                                                                     @Valid @RequestBody List<EmployeeScheduleIntervalDto> request,
+                                                                     @AuthenticationPrincipal AuthenticatedUser principal) {
         List<EmployeeScheduleInterval> intervals = request.stream()
                 .map(dto -> new EmployeeScheduleInterval(UUID.randomUUID(), dto.dayOfWeek(),
                         new TimeRange(dto.startTime(), dto.endTime())))

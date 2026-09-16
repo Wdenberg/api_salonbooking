@@ -2,8 +2,10 @@ package com.company.salonbooking.infrastructure.persistence;
 
 import com.company.salonbooking.identity.domain.model.User;
 import com.company.salonbooking.identity.domain.repository.UserRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -34,5 +36,10 @@ public class UserRepositoryAdapter  implements UserRepository {
     public User save(User user) {
         UserJpaEntity saved = jpaRepository.save(UserMapper.toEntity(user));
         return UserMapper.toDomain(saved);
+    }
+
+    @Override
+    public List<User> findAll(int page, int size) {
+        return jpaRepository.findAll(PageRequest.of(page, size)).getContent().stream().map(UserMapper::toDomain).toList();
     }
 }

@@ -1,7 +1,10 @@
 package com.company.salonbooking.shared.exception;
 
+import com.company.salonbooking.identity.domain.exception.AccountLockedException;
 import com.company.salonbooking.identity.domain.exception.EmailAlreadyExistsException;
 import com.company.salonbooking.identity.domain.exception.InvalidCredentialsException;
+import com.company.salonbooking.identity.domain.exception.InvalidRefreshTokenException;
+import com.company.salonbooking.identity.domain.exception.RefreshTokenReuseDetectedException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
@@ -34,6 +37,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<ErrorResponse> handleInvalidCredentials(InvalidCredentialsException ex, HttpServletRequest request) {
         return build(HttpStatus.UNAUTHORIZED, "INVALID_CREDENTIALS", ex.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(AccountLockedException.class)
+    public ResponseEntity<ErrorResponse> handleAccountLocked(AccountLockedException ex, HttpServletRequest request) {
+        return build(HttpStatus.TOO_MANY_REQUESTS, "ACCOUNT_LOCKED", ex.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRefreshToken(InvalidRefreshTokenException ex, HttpServletRequest request) {
+        return build(HttpStatus.UNAUTHORIZED, "INVALID_REFRESH_TOKEN", ex.getMessage(), request, List.of());
+    }
+
+    @ExceptionHandler(RefreshTokenReuseDetectedException.class)
+    public ResponseEntity<ErrorResponse> handleRefreshTokenReuseDetected(RefreshTokenReuseDetectedException ex, HttpServletRequest request) {
+        return build(HttpStatus.UNAUTHORIZED, "REFRESH_TOKEN_REUSE_DETECTED", ex.getMessage(), request, List.of());
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)

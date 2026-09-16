@@ -52,6 +52,10 @@ public final class Employee {
         return businessId.equals(businessIdToCheck);
     }
 
+    public boolean isOwnedBy(UUID ownerId) {
+        return userId.equals(ownerId);
+    }
+
     public boolean isUser(UUID userIdToCheck) {
         return userId.equals(userIdToCheck);
     }

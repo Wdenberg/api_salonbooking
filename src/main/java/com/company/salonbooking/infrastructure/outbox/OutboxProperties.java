@@ -8,7 +8,8 @@ public record OutboxProperties(
         int maxAttempts,
         long initialBackoffSeconds,
         long maxBackoffSeconds,
-        long pollIntervalMillis
+        long pollIntervalMillis,
+        Cleanup cleanup
 ) {
     public OutboxProperties {
         if (batchSize <= 0) batchSize = 50;
@@ -17,4 +18,10 @@ public record OutboxProperties(
         if (maxBackoffSeconds <= 0) maxBackoffSeconds = 300;
         if (pollIntervalMillis <= 0) pollIntervalMillis = 5000;
     }
+
+    public record Cleanup(
+            boolean enabled,
+            int retentionDays,
+            String scheduleCron
+    ) {}
 }

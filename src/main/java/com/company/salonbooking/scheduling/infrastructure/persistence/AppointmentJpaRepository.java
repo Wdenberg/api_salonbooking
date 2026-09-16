@@ -23,4 +23,14 @@ public interface AppointmentJpaRepository extends JpaRepository<AppointmentJpaEn
 
     @Query("SELECT a FROM AppointmentJpaEntity a WHERE a.status = 'CONFIRMED' AND a.startAt BETWEEN :from AND :to")
     List<AppointmentJpaEntity> findConfirmedStartingBetween(@Param("from") Instant from, @Param("to") Instant to);
+
+    @Query("SELECT COUNT(a) FROM AppointmentJpaEntity a WHERE a.businessId = :businessId AND a.status IN ('PENDING','CONFIRMED')")
+    long countActiveByBusinessId(@Param("businessId") UUID businessId);
+
+    @Query("SELECT COUNT(a) FROM AppointmentJpaEntity a WHERE a.employeeId = :employeeId AND a.status IN ('PENDING','CONFIRMED')")
+    long countActiveByEmployeeId(@Param("employeeId") UUID employeeId);
+
+    @Query("SELECT COUNT(a) FROM AppointmentJpaEntity a WHERE a.serviceId = :serviceId AND a.status IN ('PENDING','CONFIRMED')")
+    long countActiveByServiceId(@Param("serviceId") UUID serviceId);
+
 }

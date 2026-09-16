@@ -3,6 +3,7 @@ package com.company.salonbooking.infrastructure.outbox;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.List;
@@ -31,4 +32,8 @@ public interface OutboxEventJpaRepository extends JpaRepository<OutboxEventJpaEn
     @org.springframework.data.jpa.repository.Query(
             "SELECT COUNT(e) FROM OutboxEventJpaEntity e WHERE e.status = 'PENDING' AND e.createdAt < :threshold")
     long countStalePending(@org.springframework.data.repository.query.Param("threshold") java.time.Instant threshold);
+
+    @Transactional
+    @Query("DELETE FROM OutboxEventJpaEntity e WHERE e.status = 'PUBLISHED' AND e.createdAt < :cutoff")
+    int deletePublishedBefore(@Param("cutoff") Instant cutoff);
 }

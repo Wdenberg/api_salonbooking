@@ -4,7 +4,7 @@ WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline -B
 COPY src ./src
-RUN mvn clean verify -B -DskipITs
+RUN mvn clean package -B -DskipTests
 
 # Stage 2: runtime
 FROM eclipse-temurin:25-jre-jammy

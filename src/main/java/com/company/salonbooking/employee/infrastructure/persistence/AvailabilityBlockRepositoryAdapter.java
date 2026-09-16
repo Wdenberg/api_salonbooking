@@ -29,6 +29,11 @@ public class AvailabilityBlockRepositoryAdapter implements AvailabilityBlockRepo
     }
 
     @Override
+    public List<AvailabilityBlock> findByEmployeeId(UUID employeeId) {
+        return jpaRepository.findByEmployeeId(employeeId).stream().map(this::toDomain).toList();
+    }
+
+    @Override
     public AvailabilityBlock save(AvailabilityBlock block) {
         AvailabilityBlockJpaEntity entity = new AvailabilityBlockJpaEntity(block.getId(), block.getEmployeeId(),
                 block.getStartAt(), block.getEndAt(), block.getReason(), block.getCreatedAt());

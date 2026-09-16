@@ -44,4 +44,8 @@ final class AppointmentSpecifications {
             return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
         };
     }
+
+    static Specification<AppointmentJpaEntity> forAdmin(AppointmentFilter filter) {
+        return withFilter(filter);
+    }
 }

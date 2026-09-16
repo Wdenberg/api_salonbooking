@@ -13,4 +13,6 @@ public interface ServiceOfferingRepository {
     List<ServiceOffering> findByBusinessId(UUID businessId, boolean onlyActive, int page, int size);
 
     ServiceOffering save(ServiceOffering service);
+
+    void deleteById(UUID id);
 }

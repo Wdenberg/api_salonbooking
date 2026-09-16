@@ -2,6 +2,7 @@ package com.company.salonbooking.identity.application.usecase;
 
 import com.company.salonbooking.identity.application.command.LoginCommand;
 import com.company.salonbooking.identity.application.dto.AuthResult;
+import com.company.salonbooking.identity.application.port.FailedLoginTracker;
 import com.company.salonbooking.identity.application.port.PasswordHasher;
 import com.company.salonbooking.identity.application.port.TokenIssuer;
 import com.company.salonbooking.identity.domain.exception.InvalidCredentialsException;
@@ -30,17 +31,19 @@ class LoginUseCaseTest {
     @Mock private PasswordHasher passwordHasher;
     @Mock private TokenIssuer tokenIssuer;
     @Mock private AuditRecorder auditRecorder;
+    @Mock private FailedLoginTracker failedLoginTracker;
 
     private LoginUseCase useCase;
 
     @BeforeEach
     void setUp() {
-        useCase = new LoginUseCase(userRepository, passwordHasher, tokenIssuer, auditRecorder);
+        useCase = new LoginUseCase(userRepository, passwordHasher, tokenIssuer, auditRecorder, failedLoginTracker);
     }
 
     @Test
     void deveRecusarUsuarioInexistente() {
         when(userRepository.findByEmail("nobody@example.com")).thenReturn(Optional.empty());
+        when(failedLoginTracker.isLocked("login:nobody@example.com")).thenReturn(false);
 
         assertThrows(InvalidCredentialsException.class,
                 () -> useCase.execute(new LoginCommand("nobody@example.com", "any")));
@@ -51,6 +54,7 @@ class LoginUseCaseTest {
         User user = User.register(UUID.randomUUID(), "Jane", "jane@example.com", "hash", Role.CUSTOMER, Instant.now());
         when(userRepository.findByEmail("jane@example.com")).thenReturn(Optional.of(user));
         when(passwordHasher.matches("wrong", "hash")).thenReturn(false);
+        when(failedLoginTracker.isLocked("login:jane@example.com")).thenReturn(false);
 
         assertThrows(InvalidCredentialsException.class,
                 () -> useCase.execute(new LoginCommand("jane@example.com", "wrong")));
@@ -61,7 +65,8 @@ class LoginUseCaseTest {
         User user = User.register(UUID.randomUUID(), "Jane", "jane@example.com", "hash", Role.CUSTOMER, Instant.now());
         when(userRepository.findByEmail("jane@example.com")).thenReturn(Optional.of(user));
         when(passwordHasher.matches("correct", "hash")).thenReturn(true);
-        when(tokenIssuer.issueToken(user)).thenReturn(new TokenIssuer.IssuedToken("jwt-token", 3600L));
+        when(tokenIssuer.issueToken(user)).thenReturn(new TokenIssuer.IssuedToken("jwt-token", "refresh-token", 3600L, 2592000L));
+        when(failedLoginTracker.isLocked("login:jane@example.com")).thenReturn(false);
 
         AuthResult result = useCase.execute(new LoginCommand("jane@example.com", "correct"));
 

@@ -14,4 +14,6 @@ public interface AvailabilityBlockJpaRepository extends JpaRepository<Availabili
             "AND b.startAt < :to AND b.endAt > :from")
     List<AvailabilityBlockJpaEntity> findByEmployeeIdAndRange(@Param("employeeId") UUID employeeId,
                                                               @Param("from") Instant from, @Param("to") Instant to);
+
+    List<AvailabilityBlockJpaEntity> findByEmployeeId(UUID employeeId);
 }

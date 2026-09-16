@@ -56,4 +56,9 @@ public class EmployeeRepositoryAdapter implements EmployeeRepository {
         return jpaRepository.findByBusinessIdAndStatus(businessId, com.company.salonbooking.employee.domain.model.EmployeeStatus.ACTIVE)
                 .stream().map(this::toDomain).toList();
     }
+
+    @Override
+    public void deleteById(UUID id) {
+        jpaRepository.deleteById(id);
+    }
 }

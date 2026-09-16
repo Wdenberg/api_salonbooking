@@ -29,6 +29,14 @@ public interface AppointmentRepository {
 
     List<Appointment> findByBusinessId(UUID businessId, AppointmentFilter filter, int page, int size);
 
+    /** Cross-tenant: finds all appointments across all businesses (PLATFORM_ADMIN only). */
+    List<Appointment> findAll(AppointmentFilter filter, int page, int size);
+
     List<Appointment> findConfirmedStartingBetween(Instant from, Instant to);
 
+    long countActiveByBusinessId(UUID businessId);
+
+    long countActiveByEmployeeId(UUID employeeId);
+
+    long countActiveByServiceId(UUID serviceId);
 }

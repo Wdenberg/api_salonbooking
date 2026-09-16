@@ -19,4 +19,6 @@ public interface EmployeeRepository {
     boolean existsByUserIdAndBusinessId(UUID userId, UUID businessId);
 
     Employee save(Employee employee);
+
+    void deleteById(UUID id);
 }

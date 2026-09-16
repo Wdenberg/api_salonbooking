@@ -84,4 +84,26 @@ public class AppointmentRepositoryAdapter implements AppointmentRepository {
     public List<Appointment> findConfirmedStartingBetween(Instant from, Instant to) {
         return jpaRepository.findConfirmedStartingBetween(from, to).stream().map(this::toDomain).toList();
     }
+
+    @Override
+    public long countActiveByBusinessId(UUID businessId) {
+        return jpaRepository.countActiveByBusinessId(businessId);
+    }
+
+    @Override
+    public long countActiveByEmployeeId(UUID employeeId) {
+        return jpaRepository.countActiveByEmployeeId(employeeId);
+    }
+
+    @Override
+    public long countActiveByServiceId(UUID serviceId) {
+        return jpaRepository.countActiveByServiceId(serviceId);
+    }
+
+    @Override
+    public List<Appointment> findAll(AppointmentFilter filter, int page, int size) {
+        var spec = AppointmentSpecifications.forAdmin(filter);
+        var pageable = org.springframework.data.domain.PageRequest.of(page, size, org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "startAt"));
+        return jpaRepository.findAll(spec, pageable).stream().map(this::toDomain).toList();
+    }
 }

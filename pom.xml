@@ -14,7 +14,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.1.0</version>
+		<version>4.1.1</version>
 		<relativePath/>
 	</parent>
 
@@ -31,36 +31,33 @@
 
 	<properties>
 
-		<!-- Java -->
+		<!-- Java / Encoding -->
 		<java.version>25</java.version>
-
-		<!-- Encoding -->
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-		<!-- Application dependencies -->
+		<!-- Application -->
+		<springdoc.version>3.1.1</springdoc.version>
 		<jjwt.version>0.12.6</jjwt.version>
-		<springdoc.version>3.0.0</springdoc.version>
-
-		<!-- Annotation processing -->
+		<bucket4j.version>8.19.0</bucket4j.version>
 		<lombok.version>1.18.42</lombok.version>
 
-		<!-- ========================================================
-             QUALITY / BUILD TOOLS
-             ======================================================== -->
-
+		<!-- Build / Quality -->
 		<jacoco.version>0.8.15</jacoco.version>
 		<spotbugs.version>4.10.4.1</spotbugs.version>
 		<checkstyle.version>3.6.0</checkstyle.version>
 		<surefire.version>3.5.6</surefire.version>
 
+		<!-- Security / Dependency analysis -->
+		<dependency-check.version>10.0.4</dependency-check.version>
+
 		<!-- ========================================================
              TEST FILTERING
              ======================================================== -->
-
-		<!-- No inclusion by default -->
+		<jacocoArgLine></jacocoArgLine>
+		<!-- Execute tests without a specific tag filter -->
+		<surefire.groups/>
 		<surefire.groups></surefire.groups>
-
 		<!-- Exclude slow tests by default -->
 		<surefire.excludedGroups>slow</surefire.excludedGroups>
 
@@ -153,6 +150,16 @@
 			<artifactId>caffeine</artifactId>
 		</dependency>
 
+<!-- ========================================================
+              RATE LIMITING
+              ======================================================== -->
+
+		<dependency>
+			<groupId>com.bucket4j</groupId>
+			<artifactId>bucket4j_jdk17-core</artifactId>
+			<version>${bucket4j.version}</version>
+		</dependency>
+
 		<!-- ========================================================
              OBSERVABILITY
              ======================================================== -->
@@ -165,15 +172,6 @@
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
-		</dependency>
-
-		<!-- ========================================================
-             JSON
-             ======================================================== -->
-
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
 		</dependency>
 
 		<!-- ========================================================
@@ -339,21 +337,22 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<annotationProcessorPaths>
 
+				<configuration>
+					<release>${java.version}</release>
+
+					<annotationProcessorPaths>
 						<path>
 							<groupId>org.projectlombok</groupId>
 							<artifactId>lombok</artifactId>
 							<version>${lombok.version}</version>
 						</path>
-
 					</annotationProcessorPaths>
 				</configuration>
 			</plugin>
 
 			<!-- ====================================================
-                 SUREFIRE - FAST TESTS
+                 SUREFIRE
                  ==================================================== -->
 
 			<plugin>
@@ -363,30 +362,21 @@
 
 				<configuration>
 
-					<!-- JUnit 5 @Tag -->
+					<!-- JUnit 5 tags -->
 					<groups>${surefire.groups}</groups>
 					<excludedGroups>${surefire.excludedGroups}</excludedGroups>
 
-					<!-- Mockito / dynamic agent loading on recent JDKs -->
-					<argLine>${jacocoArgLine} -XX:+EnableDynamicAgentLoading</argLine>
+					<!-- JaCoCo + Mockito / dynamic agents -->
+					<argLine>
+						${jacocoArgLine}
+						-XX:+EnableDynamicAgentLoading
+					</argLine>
 
-				</configuration>
-			</plugin>
-			<!-- ====================================================
-                             OWASP dependency-check
-                             ==================================================== -->
-			<plugin>
-				<groupId>org.owasp</groupId>
-				<artifactId>dependency-check-maven</artifactId>
-				<version>10.0.4</version>
-				<configuration>
-					<failBuildOnCVSS>8</failBuildOnCVSS>
-					<suppressionFile>dependency-check-suppressions.xml</suppressionFile>
 				</configuration>
 			</plugin>
 
 			<!-- ====================================================
-                 JACOCO - CODE COVERAGE
+                 JACOCO
                  ==================================================== -->
 
 			<plugin>
@@ -396,18 +386,19 @@
 
 				<executions>
 
-					<!-- Attach JaCoCo agent before tests -->
+					<!-- Attach agent -->
 					<execution>
 						<id>prepare-agent</id>
 						<goals>
 							<goal>prepare-agent</goal>
 						</goals>
+
 						<configuration>
 							<propertyName>jacocoArgLine</propertyName>
 						</configuration>
 					</execution>
 
-					<!-- Generate coverage report -->
+					<!-- Coverage report -->
 					<execution>
 						<id>report</id>
 						<phase>test</phase>
@@ -416,10 +407,11 @@
 						</goals>
 					</execution>
 
-					<!-- Critical coverage quality gate -->
+					<!-- Coverage quality gate -->
 					<execution>
 						<id>check-critical-coverage</id>
 						<phase>verify</phase>
+
 						<goals>
 							<goal>check</goal>
 						</goals>
@@ -440,27 +432,24 @@
 									</includes>
 
 									<limits>
-
 										<limit>
 											<counter>LINE</counter>
 											<value>COVEREDRATIO</value>
 											<minimum>0.75</minimum>
 										</limit>
-
 									</limits>
 
 								</rule>
 
 							</rules>
 						</configuration>
-
 					</execution>
 
 				</executions>
 			</plugin>
 
 			<!-- ====================================================
-                 SPOTBUGS - STATIC BUG ANALYSIS
+                 SPOTBUGS
                  ==================================================== -->
 
 			<plugin>
@@ -469,23 +458,13 @@
 				<version>${spotbugs.version}</version>
 
 				<configuration>
-
-					<!-- Maximum analysis effort -->
 					<effort>Max</effort>
-
-					<!-- Medium and above -->
 					<threshold>Medium</threshold>
-
-					<!-- Optional project-specific exclusions -->
 					<excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
-
-					<!-- Fail build if SpotBugs reports an analysis error -->
 					<failOnError>true</failOnError>
-
 				</configuration>
 
 				<executions>
-
 					<execution>
 						<id>spotbugs-check</id>
 						<phase>verify</phase>
@@ -493,13 +472,11 @@
 							<goal>check</goal>
 						</goals>
 					</execution>
-
 				</executions>
-
 			</plugin>
 
 			<!-- ====================================================
-                 CHECKSTYLE - CODE STYLE
+                 CHECKSTYLE
                  ==================================================== -->
 
 			<plugin>
@@ -508,29 +485,15 @@
 				<version>${checkstyle.version}</version>
 
 				<configuration>
-
-					<!-- Project rule file -->
 					<configLocation>checkstyle.xml</configLocation>
-
-					<!-- Show violations on console -->
 					<consoleOutput>true</consoleOutput>
-
-					<!-- Fail build when violations are detected -->
 					<failOnViolation>true</failOnViolation>
-
-					<!-- Fail immediately on Checkstyle errors -->
 					<failsOnError>true</failsOnError>
-
-					<!-- All configured violations are build-blocking errors -->
 					<violationSeverity>error</violationSeverity>
-
-					<!-- Do not inspect generated code -->
 					<excludeGeneratedSources>true</excludeGeneratedSources>
-
 				</configuration>
 
 				<executions>
-
 					<execution>
 						<id>checkstyle-validation</id>
 						<phase>verify</phase>
@@ -538,9 +501,24 @@
 							<goal>check</goal>
 						</goals>
 					</execution>
-
 				</executions>
+			</plugin>
 
+			<!-- ====================================================
+                 OWASP DEPENDENCY CHECK
+                 ==================================================== -->
+
+			<plugin>
+				<groupId>org.owasp</groupId>
+				<artifactId>dependency-check-maven</artifactId>
+				<version>${dependency-check.version}</version>
+
+				<configuration>
+					<failBuildOnCVSS>8</failBuildOnCVSS>
+					<suppressionFile>
+						dependency-check-suppressions.xml
+					</suppressionFile>
+				</configuration>
 			</plugin>
 
 		</plugins>
@@ -558,18 +536,12 @@
              ======================================================== -->
 
 		<profile>
-
 			<id>full-test-suite</id>
 
 			<properties>
-
-				<!--
-                    Removes the default exclusion of @Tag("slow").
-                -->
-				<surefire.excludedGroups></surefire.excludedGroups>
-
+				<!-- Execute slow tests as well -->
+				<surefire.excludedGroups/>
 			</properties>
-
 		</profile>
 
 	</profiles>

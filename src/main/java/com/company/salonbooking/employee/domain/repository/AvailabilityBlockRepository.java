@@ -13,6 +13,9 @@ public interface AvailabilityBlockRepository {
 
     List<AvailabilityBlock> findByEmployeeIdAndRange(UUID employeeId, Instant from, Instant to);
 
+    /** Finds all availability blocks for an employee (no date filter). */
+    List<AvailabilityBlock> findByEmployeeId(UUID employeeId);
+
     AvailabilityBlock save(AvailabilityBlock block);
 
     void deleteById(UUID id);

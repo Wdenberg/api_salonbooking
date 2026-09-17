@@ -4,10 +4,12 @@ import com.company.salonbooking.identity.application.command.LoginCommand;
 import com.company.salonbooking.identity.application.dto.AuthResult;
 import com.company.salonbooking.identity.application.port.FailedLoginTracker;
 import com.company.salonbooking.identity.application.port.PasswordHasher;
+import com.company.salonbooking.identity.application.port.RefreshTokenHasher;
 import com.company.salonbooking.identity.application.port.TokenIssuer;
 import com.company.salonbooking.identity.domain.exception.InvalidCredentialsException;
 import com.company.salonbooking.identity.domain.model.Role;
 import com.company.salonbooking.identity.domain.model.User;
+import com.company.salonbooking.identity.domain.repository.RefreshTokenRepository;
 import com.company.salonbooking.identity.domain.repository.UserRepository;
 import com.company.salonbooking.shared.application.port.AuditRecorder;
 import org.junit.jupiter.api.BeforeEach;
@@ -16,28 +18,35 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
 import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Optional;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class LoginUseCaseTest {
 
     @Mock private UserRepository userRepository;
+    @Mock private RefreshTokenRepository refreshTokenRepository;
     @Mock private PasswordHasher passwordHasher;
+    @Mock private RefreshTokenHasher refreshTokenHasher;
     @Mock private TokenIssuer tokenIssuer;
     @Mock private AuditRecorder auditRecorder;
     @Mock private FailedLoginTracker failedLoginTracker;
 
     private LoginUseCase useCase;
+    private final Clock clock = Clock.fixed(Instant.parse("2026-08-12T10:00:00Z"), ZoneOffset.UTC);
 
     @BeforeEach
     void setUp() {
-        useCase = new LoginUseCase(userRepository, passwordHasher, tokenIssuer, auditRecorder, failedLoginTracker);
+        useCase = new LoginUseCase(userRepository, refreshTokenRepository, passwordHasher, refreshTokenHasher,
+                tokenIssuer, auditRecorder, failedLoginTracker, clock);
     }
 
     @Test
@@ -66,6 +75,7 @@ class LoginUseCaseTest {
         when(userRepository.findByEmail("jane@example.com")).thenReturn(Optional.of(user));
         when(passwordHasher.matches("correct", "hash")).thenReturn(true);
         when(tokenIssuer.issueToken(user)).thenReturn(new TokenIssuer.IssuedToken("jwt-token", "refresh-token", 3600L, 2592000L));
+        when(refreshTokenHasher.hash("refresh-token")).thenReturn("refresh-token-hash");
         when(failedLoginTracker.isLocked("login:jane@example.com")).thenReturn(false);
 
         AuthResult result = useCase.execute(new LoginCommand("jane@example.com", "correct"));

@@ -153,6 +153,11 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.UNPROCESSABLE_ENTITY, "IDEMPOTENCY_KEY_MISMATCH", ex.getMessage(), request, List.of());
     }
 
+    @ExceptionHandler(IllegalStateException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalState(IllegalStateException ex, HttpServletRequest request) {
+        return build(HttpStatus.CONFLICT, "BUSINESS_RULE_VIOLATION", ex.getMessage(), request, List.of());
+    }
+
     @ExceptionHandler(com.company.salonbooking.reporting.domain.exception.InvalidReportRequestException.class)
     public ResponseEntity<ErrorResponse> handleInvalidReportRequest(
             com.company.salonbooking.reporting.domain.exception.InvalidReportRequestException ex, HttpServletRequest request) {

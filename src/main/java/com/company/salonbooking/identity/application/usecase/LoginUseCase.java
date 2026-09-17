@@ -5,34 +5,48 @@ import com.company.salonbooking.identity.application.command.LoginCommand;
 import com.company.salonbooking.identity.application.dto.AuthResult;
 import com.company.salonbooking.identity.application.port.FailedLoginTracker;
 import com.company.salonbooking.identity.application.port.PasswordHasher;
+import com.company.salonbooking.identity.application.port.RefreshTokenHasher;
 import com.company.salonbooking.identity.application.port.TokenIssuer;
 import com.company.salonbooking.identity.domain.exception.InvalidCredentialsException;
 import com.company.salonbooking.identity.domain.exception.AccountLockedException;
+import com.company.salonbooking.identity.domain.model.RefreshToken;
 import com.company.salonbooking.identity.domain.model.User;
+import com.company.salonbooking.identity.domain.repository.RefreshTokenRepository;
 import com.company.salonbooking.identity.domain.repository.UserRepository;
 import com.company.salonbooking.shared.application.port.AuditRecorder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Clock;
+import java.time.Instant;
+import java.util.UUID;
 
 @Service
 public class LoginUseCase {
 
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordHasher passwordHasher;
+    private final RefreshTokenHasher refreshTokenHasher;
     private final TokenIssuer tokenIssuer;
     private final AuditRecorder auditRecorder;
     private final FailedLoginTracker failedLoginTracker;
+    private final Clock clock;
 
-    public LoginUseCase(UserRepository userRepository, PasswordHasher passwordHasher, TokenIssuer tokenIssuer,
-                        AuditRecorder auditRecorder, FailedLoginTracker failedLoginTracker
+    public LoginUseCase(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository,
+                        PasswordHasher passwordHasher, RefreshTokenHasher refreshTokenHasher,
+                        TokenIssuer tokenIssuer,
+                        AuditRecorder auditRecorder, FailedLoginTracker failedLoginTracker,
+                        Clock clock
     ) {
         this.userRepository = userRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.passwordHasher = passwordHasher;
+        this.refreshTokenHasher = refreshTokenHasher;
         this.tokenIssuer = tokenIssuer;
         this.auditRecorder = auditRecorder;
         this.failedLoginTracker = failedLoginTracker;
+        this.clock = clock;
     }
 
     @Transactional
@@ -66,7 +80,15 @@ public class LoginUseCase {
         // Success - reset failure count
         failedLoginTracker.recordSuccess(trackerKey);
 
+        Instant now = Instant.now(clock);
         TokenIssuer.IssuedToken token = tokenIssuer.issueToken(user);
+
+        String refreshTokenHash = refreshTokenHasher.hash(token.refreshToken());
+        RefreshToken refreshToken = RefreshToken.create(
+                UUID.randomUUID(), user.getId(), refreshTokenHash, null,
+                now.plusSeconds(token.refreshTokenExpiresInSeconds()), now);
+        refreshTokenRepository.save(refreshToken);
+
         auditRecorder.record(user.getId(), null, AuditAction.LOGIN, "User", user.getId(), null);
         return new AuthResult(user.getId(), token.accessToken(), token.refreshToken(), token.accessTokenExpiresInSeconds(), token.refreshTokenExpiresInSeconds());
     }

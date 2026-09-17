@@ -3,10 +3,11 @@ package com.company.salonbooking.identity.application.usecase;
 import com.company.salonbooking.identity.application.command.RegisterOwnerCommand;
 import com.company.salonbooking.identity.application.dto.AuthResult;
 import com.company.salonbooking.identity.application.port.PasswordHasher;
+import com.company.salonbooking.identity.application.port.RefreshTokenHasher;
 import com.company.salonbooking.identity.application.port.TokenIssuer;
 import com.company.salonbooking.identity.domain.exception.EmailAlreadyExistsException;
-import com.company.salonbooking.identity.domain.model.Role;
 import com.company.salonbooking.identity.domain.model.User;
+import com.company.salonbooking.identity.domain.repository.RefreshTokenRepository;
 import com.company.salonbooking.identity.domain.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,7 +28,9 @@ import static org.mockito.Mockito.when;
 class RegisterOwnerUseCaseTest {
 
     @Mock private UserRepository userRepository;
+    @Mock private RefreshTokenRepository refreshTokenRepository;
     @Mock private PasswordHasher passwordHasher;
+    @Mock private RefreshTokenHasher refreshTokenHasher;
     @Mock private TokenIssuer tokenIssuer;
 
     private RegisterOwnerUseCase useCase;
@@ -35,7 +38,7 @@ class RegisterOwnerUseCaseTest {
 
     @BeforeEach
     void setUp() {
-        useCase = new RegisterOwnerUseCase(userRepository, passwordHasher, tokenIssuer, clock);
+        useCase = new RegisterOwnerUseCase(userRepository, refreshTokenRepository, passwordHasher, refreshTokenHasher, tokenIssuer, clock);
     }
 
     @Test
@@ -53,6 +56,7 @@ class RegisterOwnerUseCaseTest {
         when(passwordHasher.hash("password123")).thenReturn("hashed");
         when(userRepository.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
         when(tokenIssuer.issueToken(any(User.class))).thenReturn(new TokenIssuer.IssuedToken("jwt-token", "refresh-token", 3600L, 2592000L));
+        when(refreshTokenHasher.hash("refresh-token")).thenReturn("refresh-token-hash");
 
         RegisterOwnerCommand command = new RegisterOwnerCommand("Owner", "owner@example.com", "password123");
         AuthResult result = useCase.execute(command);

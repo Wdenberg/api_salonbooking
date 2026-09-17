@@ -7,12 +7,15 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface RefreshTokenJpaRepository extends JpaRepository<RefreshTokenJpaEntity, UUID> {
 
     Optional<RefreshTokenJpaEntity> findByTokenHash(String tokenHash);
+
+    List<RefreshTokenJpaEntity> findByRevokedFalse();
 
     void deleteByExpiresAtBeforeAndRevokedFalse(Instant now);
 

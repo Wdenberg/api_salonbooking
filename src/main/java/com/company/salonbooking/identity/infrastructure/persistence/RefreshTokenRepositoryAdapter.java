@@ -5,6 +5,7 @@ import com.company.salonbooking.identity.domain.repository.RefreshTokenRepositor
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -23,6 +24,13 @@ public class RefreshTokenRepositoryAdapter implements RefreshTokenRepository {
     public Optional<RefreshToken> findByTokenHash(String tokenHash) {
         return jpaRepository.findByTokenHash(tokenHash)
                 .map(mapper::toDomain);
+    }
+
+    @Override
+    public List<RefreshToken> findAllActive() {
+        return jpaRepository.findByRevokedFalse().stream()
+                .map(mapper::toDomain)
+                .toList();
     }
 
     @Override

@@ -4,10 +4,13 @@ import com.company.salonbooking.identity.application.command.RegisterCustomerCom
 import com.company.salonbooking.identity.application.dto.AuthResult;
 import com.company.salonbooking.identity.application.port.CustomerProfileInitializer;
 import com.company.salonbooking.identity.application.port.PasswordHasher;
+import com.company.salonbooking.identity.application.port.RefreshTokenHasher;
 import com.company.salonbooking.identity.application.port.TokenIssuer;
 import com.company.salonbooking.identity.domain.exception.EmailAlreadyExistsException;
+import com.company.salonbooking.identity.domain.model.RefreshToken;
 import com.company.salonbooking.identity.domain.model.Role;
 import com.company.salonbooking.identity.domain.model.User;
+import com.company.salonbooking.identity.domain.repository.RefreshTokenRepository;
 import com.company.salonbooking.identity.domain.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,15 +23,21 @@ import java.util.UUID;
 public class RegisterCustomerUseCase {
 
     private final UserRepository userRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordHasher passwordHasher;
+    private final RefreshTokenHasher refreshTokenHasher;
     private final TokenIssuer tokenIssuer;
     private final CustomerProfileInitializer customerProfileInitializer;
     private final Clock clock;
 
-    public RegisterCustomerUseCase(UserRepository userRepository, PasswordHasher passwordHasher, TokenIssuer tokenIssuer,
+    public RegisterCustomerUseCase(UserRepository userRepository, RefreshTokenRepository refreshTokenRepository,
+                                   PasswordHasher passwordHasher, RefreshTokenHasher refreshTokenHasher,
+                                   TokenIssuer tokenIssuer,
                                    CustomerProfileInitializer customerProfileInitializer, Clock clock) {
         this.userRepository = userRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.passwordHasher = passwordHasher;
+        this.refreshTokenHasher = refreshTokenHasher;
         this.tokenIssuer = tokenIssuer;
         this.customerProfileInitializer = customerProfileInitializer;
         this.clock = clock;
@@ -47,7 +56,15 @@ public class RegisterCustomerUseCase {
 
         customerProfileInitializer.initializeFor(saved.getId());
 
+        Instant now = Instant.now(clock);
         TokenIssuer.IssuedToken token = tokenIssuer.issueToken(saved);
+
+        String refreshTokenHash = refreshTokenHasher.hash(token.refreshToken());
+        RefreshToken refreshToken = RefreshToken.create(
+                UUID.randomUUID(), saved.getId(), refreshTokenHash, null,
+                now.plusSeconds(token.refreshTokenExpiresInSeconds()), now);
+        refreshTokenRepository.save(refreshToken);
+
         return new AuthResult(saved.getId(), token.accessToken(), token.refreshToken(), token.accessTokenExpiresInSeconds(), token.refreshTokenExpiresInSeconds());
     }
 }

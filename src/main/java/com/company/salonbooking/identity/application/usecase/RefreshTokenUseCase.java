@@ -42,16 +42,15 @@ public class RefreshTokenUseCase {
 
     @Transactional
     public AuthResult execute(RefreshTokenCommand command) {
-        String tokenHash = tokenHasher.hash(command.refreshToken());
-
-        RefreshToken storedToken = refreshTokenRepository.findByTokenHash(tokenHash)
-                .orElseThrow(InvalidRefreshTokenException::new);
-
         Instant now = Instant.now(clock);
 
+        RefreshToken storedToken = findTokenByRaw(command.refreshToken(), now);
+
+        if (storedToken == null) {
+            throw new InvalidRefreshTokenException();
+        }
+
         if (storedToken.isRevoked()) {
-            // Check for reuse detection: if this token was revoked due to rotation reuse,
-            // we should revoke the entire chain (all tokens with same parent)
             if ("ROTATION_REUSE_DETECTED".equals(storedToken.getRevokedReason())) {
                 revokeTokenChain(storedToken.getUserId(), now);
             }
@@ -69,7 +68,6 @@ public class RefreshTokenUseCase {
             throw new InvalidRefreshTokenException();
         }
 
-        // Rotate: revoke current token, create new one with parent link
         storedToken.revoke("ROTATION", now);
         refreshTokenRepository.save(storedToken);
 
@@ -80,7 +78,7 @@ public class RefreshTokenUseCase {
                 UUID.randomUUID(),
                 user.getId(),
                 newRefreshTokenHash,
-                tokenHash,
+                storedToken.getTokenHash(),
                 now.plusSeconds(tokens.refreshTokenExpiresInSeconds()),
                 now
         );
@@ -90,6 +88,18 @@ public class RefreshTokenUseCase {
 
         return new AuthResult(user.getId(), tokens.accessToken(), tokens.refreshToken(),
                 tokens.accessTokenExpiresInSeconds(), tokens.refreshTokenExpiresInSeconds());
+    }
+
+    private RefreshToken findTokenByRaw(String rawToken, Instant now) {
+        // BCrypt generates different hashes for the same input, so we can't do exact hash lookup.
+        // Instead, fetch all active tokens and use matches() to verify.
+        var allTokens = refreshTokenRepository.findAllActive();
+        for (RefreshToken token : allTokens) {
+            if (tokenHasher.matches(rawToken, token.getTokenHash())) {
+                return token;
+            }
+        }
+        return null;
     }
 
     private void revokeTokenChain(UUID userId, Instant now) {

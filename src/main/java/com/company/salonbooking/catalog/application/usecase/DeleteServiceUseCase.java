@@ -2,6 +2,7 @@ package com.company.salonbooking.catalog.application.usecase;
 
 import com.company.salonbooking.audit.domain.model.AuditAction;
 import com.company.salonbooking.scheduling.domain.repository.AppointmentRepository;
+import com.company.salonbooking.business.domain.repository.BusinessRepository;
 import com.company.salonbooking.catalog.application.command.DeleteServiceCommand;
 import com.company.salonbooking.catalog.domain.exception.ServiceOfferingNotFoundException;
 import com.company.salonbooking.catalog.domain.model.ServiceOffering;
@@ -19,13 +20,15 @@ import java.util.UUID;
 public class DeleteServiceUseCase {
 
     private final ServiceOfferingRepository serviceRepository;
+    private final BusinessRepository businessRepository;
     private final AppointmentRepository appointmentRepository;
     private final AuditRecorder auditRecorder;
     private final Clock clock;
 
-    public DeleteServiceUseCase(ServiceOfferingRepository serviceRepository, AppointmentRepository appointmentRepository,
-                                AuditRecorder auditRecorder, Clock clock) {
+    public DeleteServiceUseCase(ServiceOfferingRepository serviceRepository, BusinessRepository businessRepository,
+                                AppointmentRepository appointmentRepository, AuditRecorder auditRecorder, Clock clock) {
         this.serviceRepository = serviceRepository;
+        this.businessRepository = businessRepository;
         this.appointmentRepository = appointmentRepository;
         this.auditRecorder = auditRecorder;
         this.clock = clock;
@@ -36,7 +39,10 @@ public class DeleteServiceUseCase {
         ServiceOffering service = serviceRepository.findById(command.serviceId())
                 .orElseThrow(() -> new ServiceOfferingNotFoundException(command.serviceId()));
 
-        if (!service.isOwnedBy(command.requesterId())) {
+        var business = businessRepository.findById(service.getBusinessId())
+                .orElseThrow(() -> new com.company.salonbooking.business.domain.exception.BusinessNotFoundException(service.getBusinessId()));
+
+        if (!business.getOwnerId().equals(command.requesterId())) {
             throw new UnauthorizedResourceException("You do not own this service.");
         }
 
